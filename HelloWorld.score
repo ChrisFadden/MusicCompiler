@@ -1,0 +1,35 @@
+
+//Compile with:  compose file.score
+
+#import io;
+
+FUNCTION void PrintHelloWorld()
+
+  println("Hello World");
+
+END FUNCTION
+
+CLASS CustomType
+  var a;
+  var b;
+  var c;
+
+  double doSomething();
+  int doSomethingElse();
+
+END CLASS
+
+
+PROGRAM Hello World
+  
+  #DEBUG("Before PrintHelloWorld")
+  PrintHelloWorld();  
+  
+  #Jazz (unsafe block)
+  CustomType b.construct();  
+  
+  double e = 32;
+  int a = 2;
+  float b = 12;
+
+END PROGRAM Hello World
