@@ -1,0 +1,117 @@
+
+//Compile (eventually) with:  compose file.score
+
+#import io;
+
+FUNCTION void PrintHelloWorld()
+
+  io::println("Hello World");
+
+END FUNCTION
+
+//everything is passed by const reference
+FUNCTION DOUBLE CalcSqrt(DOUBLE x)
+  RETURN x*x;
+END FUNCTION
+
+//If you want to actually pass a copy, you can create a local
+//copy and set it equal to the value you've passed in.
+FUNCTION VOID ChangeValue(MUTABLE DOUBLE x)
+  x = x*x;
+  RETURN;
+END FUNCTION
+
+//There is no return by reference (maybe).  
+//In order to get array operations to work
+//I'll overload the "=" operator.  Or something similar...
+
+
+//For loops are for_each loops, and iterate over a collection.
+//there is no types, as in this case "song" is assumed to be an
+//iterator whose type can be inferred from album.
+FOR song IN album:
+  play(song);
+END FOR
+
+//This loop will print 0, 2, 4, 6
+FOR i IN 0:2:6
+  io::println(i);
+END FOR
+
+//This loop will also print 0,2,4,6
+WHILE(i = 0; i < 7; i+=2)
+  io::println(i);
+END WHILE
+
+//Infinite Loop
+WHILE(;!GetUserInput();)
+END WHILE
+
+//Doing IF(a = 3) will give an error unless in a jazz block
+IF(a == 3)
+  a = a / 2;
+ELSEIF(a == 4)
+  a = a*a;
+ELSE
+  a = 0;
+END IF
+
+//Collection is a catch-all for class,struct,enum, and namespace.
+//Any function in a file not in a collection is put in an "anonymous" collection
+//that is the filename.
+#One-Hit Wonder //Warn if multiple instances of this collection is created
+COLLECTION CustomType
+  DOUBLE a = 4.2;
+  AUTO b = 2;
+  INT c = 1;
+
+  FUNCTION DOUBLE doSomething()
+    io::println("I actually do nothing"); 
+  END FUNCTION
+  
+  //What to do if on lhs of equal sign.
+  FUNCTION VOID operator=(SELF,CustomType rhs)
+    self.a = rhs.a;
+    self.b = rhs.b;
+    self.c = 1;
+  END FUNCTION
+  
+  //THIS is a pointer to the current object
+  //I think I need better notation for pointer
+  FUNCTION CustomType* GetPointer()
+    RETURN THIS;
+  END FUNCTION
+
+  /*What to do if on rhs of equal sign.  If both objects
+   *overload the equal operator, whatever is on the right
+   *side of the equal sign takes precedence and a warning
+   * is emitted
+   */
+  FUNCTION VOID operator=(MUTABLE CustomType lhs, SELF)
+    lhs.a = self.a
+    lhs.b = self.b
+    lhs.c = self.c
+  END FUNCTION
+
+END COLLECTION
+
+PROGRAM Hello World
+  
+  #DEBUG("Before PrintHelloWorld")
+  PrintHelloWorld();  
+  
+  #Jazz //unsafe block
+    AUTO i = 4 / 3; //will equal 1 with no warnings. 
+  #end Jazz 
+  
+  AUTO j = 4 / 3; //will equal 1, but will give a warning.
+
+  CustomType b.construct();  
+  
+  b::doSomething();
+
+  DOUBLE e = 32;
+  INT a = 2;
+  FLOAT b = 12;
+
+END PROGRAM Hello World

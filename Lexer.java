@@ -6,38 +6,41 @@ public class Lexer {
   public static enum TokenType {
     //Number/Operation Tokens
     NumberTok("-?[0-9]+"),
-    BinaryOpTok("[*|/|+|-]"),
+    BinaryOpTok("[*|/|+|-|!]"),
     BooleanOpTok("(<=|>=|<|>|==|!=)"),
     EqualOpTok("(=)"),
     WhitespaceTok("[ \t\f\r\n]+"),
      
     //If tokens 
-    IfTok("(if|IF)"),
-    ElseifTok("(elseif|ELSEIF)"),
-    ElseTok("(else|ELSE)"),
-    EndifTok("(end if|END IF)"),
+    IfTok("(IF)"),
+    ElseifTok("(ELSEIF)"),
+    ElseTok("(ELSE)"),
+    EndifTok("(END IF)"),
     
     //Loop tokens
-    ForTok("(for|FOR)"),
-    WhileTok("(while|WHILE)"),
-    EndForTok("(end for|END FOR)"),
-    EndWhileTok("(end while|END WHILE)"),
+    ForTok("(FOR)"),
+    WhileTok("(WHILE)"),
+    InTok("(IN)"), 
+    EndForTok("(END FOR)"),
+    EndWhileTok("(END WHILE)"),
     
     //Function Tokens
-    FunctionTok("(function|FUNCTION)"),
-    EndFunctionTok("(end function|END FUNCTION)"),
-    ReturnTok("(return|RETURN)"),
+    FunctionTok("(FUNCTION)"),
+    EndFunctionTok("(END FUNCTION)"),
+    ReturnTok("(RETURN)"),
     
     //Class Tokens
-    ClassTok("(class|CLASS)"),
-    EndClassTok("(end class|END CLASS)"),
+    CollectionTok("(COLLECTION)"),
+    EndCollectionTok("(END COLLECTION)"),
+    SelfTok("(SELF)"),
+    ThisTok("(THIS)"),
 
     //Program tokens
-    ProgramTok("(program|PROGRAM)"),
-    EndProgramTok("(end program|END PROGRAM)"),
+    ProgramTok("(PROGRAM)"),
+    EndProgramTok("(END PROGRAM)"),
 
     //Type Tokens
-    TypeTok("(int|double|char|bool|INT|DOUBLE|CHAR|BOOL)"),
+    TypeTok("(INT|DOUBLE|CHAR|BOOL|AUTO)"),
     NameTok("[_a-zA-Z][_a-zA-Z0-9]{0,100}"),
     
     //Comment Tokens
