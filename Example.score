@@ -111,10 +111,13 @@ GENERIC COLLECTION Vector<T>
     size = 0;
     data = NULLPTR;
   END FUNCTION
+  
+  FUNCTION GENERIC<T> Construct(INT num)
+    size = num;
+    data = NEW<num> GENERIC<T>;
+  END FUNCTION
 
 END GENERIC COLLECTION
-
-
 
 PROGRAM Hello World
   
