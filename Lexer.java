@@ -39,11 +39,15 @@ public class Lexer {
     ProgramTok("(PROGRAM)"),
     EndProgramTok("(END PROGRAM)"),
 
+    //Memory Tokens
+    NewTok("(NEW)"),
+    NullptrTok("(NULLPTR)"),
+
     //Type Tokens
-    TypeTok("(INT|DOUBLE|CHAR|BOOL|AUTO)"),
+    TypeTok("(INT|DOUBLE|CHAR|BOOL|GENERIC|AUTO)"),
     NameTok("[_a-zA-Z][_a-zA-Z0-9]{0,100}"),
     
-    //Comment Tokens
+    //Compiler Directive Tokens
     HashTok("(#)"),
 
     //Character Tokens

@@ -10,6 +10,7 @@ FUNCTION void PrintHelloWorld()
 END FUNCTION
 
 //everything is passed by const reference
+//and returned by reference.
 FUNCTION DOUBLE CalcSqrt(DOUBLE x)
   RETURN x*x;
 END FUNCTION
@@ -20,11 +21,6 @@ FUNCTION VOID ChangeValue(MUTABLE DOUBLE x)
   x = x*x;
   RETURN;
 END FUNCTION
-
-//There is no return by reference (maybe).  
-//In order to get array operations to work
-//I'll overload the "=" operator.  Or something similar...
-
 
 //For loops are for_each loops, and iterate over a collection.
 //there is no types, as in this case "song" is assumed to be an
@@ -59,6 +55,8 @@ END IF
 //Collection is a catch-all for class,struct,enum, and namespace.
 //Any function in a file not in a collection is put in an "anonymous" collection
 //that is the filename.
+//variables are private by default
+//must preface with public, or protected if you want that
 #One-Hit Wonder //Warn if multiple instances of this collection is created
 COLLECTION CustomType
   DOUBLE a = 4.2;
@@ -76,9 +74,13 @@ COLLECTION CustomType
     self.c = 1;
   END FUNCTION
   
+  FUNCTION CustomType construct()
+    RETURN NEW CustomType;
+  END FUNCTION
+
   //THIS is a pointer to the current object
   //I think I need better notation for pointer
-  FUNCTION CustomType* GetPointer()
+  FUNCTION CustomType^ GetPointer()
     RETURN THIS;
   END FUNCTION
 
@@ -94,6 +96,25 @@ COLLECTION CustomType
   END FUNCTION
 
 END COLLECTION
+
+//GENERIC specifies it can be any type, like templates or generics
+FUNCTION void GenericFunction(GENERIC<T> a)
+  GENERIC<T> b = a + a; //type of b will be whatever a is
+END FUNCTION
+
+GENERIC COLLECTION Vector<T>
+  
+  PUBLIC INT size;
+  T^ data;
+
+  FUNCTION GENERIC<T> Construct()
+    size = 0;
+    data = NULLPTR;
+  END FUNCTION
+
+END GENERIC COLLECTION
+
+
 
 PROGRAM Hello World
   
@@ -112,6 +133,5 @@ PROGRAM Hello World
 
   DOUBLE e = 32;
   INT a = 2;
-  FLOAT b = 12;
 
 END PROGRAM Hello World
