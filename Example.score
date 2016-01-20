@@ -75,7 +75,7 @@ COLLECTION CustomType
   END FUNCTION
   
   FUNCTION CustomType construct()
-    RETURN NEW CustomType;
+    RETURN CustomType{1};
   END FUNCTION
 
   //THIS is a pointer to the current object
@@ -114,7 +114,7 @@ GENERIC COLLECTION Vector<T>
   
   FUNCTION GENERIC<T> Construct(INT num)
     size = num;
-    data = NEW<num> GENERIC<T>;
+    data = GENERIC<T>{num};
   END FUNCTION
 
 END GENERIC COLLECTION
