@@ -13,42 +13,43 @@ public class Parser {
   
   private String ProgramName;
 
-  public Parser(ArrayList<ArrayList<Lexer.Token>> tokens){     
+  public Parser(ArrayList<ArrayList<Lexer.Token>> tokens, String filename){     
     unchangedLexInput = tokens;
     //lexInput = tokens;
-    
-    System.out.print("This file has line number equal to: ");
-    System.out.println(tokens.size());
-    
+       
     ProgramName = "";
     
+    int i = 1;
     for(ArrayList<Lexer.Token> token : unchangedLexInput)
     {
       if(token.size() > 0){ 
         if(token.get(0).type == Lexer.TokenType.FunctionTok){
         } 
         else if(token.get(0).type == Lexer.TokenType.ProgramTok){
-          ParseProgName(token); 
+          ParseProgName(token,i,filename); 
         }
       }//end token size check
+      i++;
     }//end Lex loop
   }//end Parser constructor
   
-  public void ParseProgName(ArrayList<Lexer.Token> LexInput){  
+  public void ParseProgName(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){  
         for(Lexer.Token token : LexInput){
           if(token.type == Lexer.TokenType.NameTok){
             ProgramName += token.data;
           } else if(token.type == Lexer.TokenType.ProgramTok){
           } else{
             System.out.print("\033[1m\033[33m");
-            System.out.print("Parse Error:  Only program names are allowed ");
+            System.out.print("Parse Error(");
+            System.out.print(filename);
+            System.out.print(": ");
+            System.out.print(lineNum);
+            System.out.print(") Only program names are allowed ");
             System.out.print("after a PROGRAM statement");
             System.out.println("\033[0m");
             break;
           }
-      }  
-    System.out.print("The program name is: ");
-    System.out.println(ProgramName);
+      }//end token array loop  
   }//end ParseProgName
 
 }//end class

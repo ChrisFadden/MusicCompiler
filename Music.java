@@ -11,6 +11,6 @@ public class Music {
       tokens.add(Lexer.lex(input));
     }
     
-    Parser parser = new Parser(tokens);
+    Parser parser = new Parser(tokens,filename);
   }//end main
 }//end class
