@@ -1,4 +1,4 @@
-PROGRAM Hello World
+PROGRAM Hello World INT x = 4
     INT x = 4;
     CHAR x = intersperse;
 END PROGRAM Hello World

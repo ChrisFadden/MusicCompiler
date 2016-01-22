@@ -17,12 +17,6 @@ public class Lexer {
     ElseTok("(ELSE)"),
     EndifTok("(END IF)"),
     
-    //Loop tokens
-    ForTok("(FOR)"),
-    WhileTok("(WHILE)"),
-    InTok("(IN)"), 
-    EndForTok("(END FOR)"),
-    EndWhileTok("(END WHILE)"),
     
     //Function Tokens
     FunctionTok("(FUNCTION)"),
@@ -42,9 +36,18 @@ public class Lexer {
     //Memory Tokens
     NewTok("(NEW)"),
     NullptrTok("(NULLPTR)"),
-
+     
     //Type Tokens
     TypeTok("(INT|DOUBLE|CHAR|BOOL|GENERIC|AUTO)"),
+ 
+    //Loop tokens
+    ForTok("(FOR)"),
+    WhileTok("(WHILE)"),
+    InTok("(IN)"), 
+    EndForTok("(END FOR)"),
+    EndWhileTok("(END WHILE)"),
+     
+    //NameTok 
     NameTok("[_a-zA-Z][_a-zA-Z0-9]{0,100}"),
     
     //Compiler Directive Tokens

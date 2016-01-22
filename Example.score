@@ -25,7 +25,7 @@ END FUNCTION
 //For loops are for_each loops, and iterate over a collection.
 //there is no types, as in this case "song" is assumed to be an
 //iterator whose type can be inferred from album.
-FOR song IN album:
+FOR song IN album
   play(song);
 END FOR
 
@@ -119,7 +119,7 @@ GENERIC COLLECTION Vector<T>
 
 END GENERIC COLLECTION
 
-PROGRAM Hello World
+PROGRAM Language Example
   
   #DEBUG("Before PrintHelloWorld")
   PrintHelloWorld();  
@@ -137,4 +137,4 @@ PROGRAM Hello World
   DOUBLE e = 32;
   INT a = 2;
 
-END PROGRAM Hello World
+END PROGRAM Language Example
