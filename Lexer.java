@@ -6,6 +6,7 @@ public class Lexer {
   public static enum TokenType {
     //Number/Operation Tokens
     NumberTok("-?[0-9]+"),
+    CommentTok("(//)"),
     BinaryOpTok("[*|/|+|-|!]"),
     BooleanOpTok("(<=|>=|<|>|==|!=)"),
     EqualOpTok("(=)"),

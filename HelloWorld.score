@@ -5,6 +5,10 @@ PROGRAM Hello World
       RETURN;
     END FUNCTION
     
+    WHILE(i = 0; i < 4; i++)
+      i++;
+    END WHILE
+
     INT x = 4;
     CHAR x = intersperse;
 END PROGRAM Hello World

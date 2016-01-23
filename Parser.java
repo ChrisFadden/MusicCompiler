@@ -25,8 +25,11 @@ public class Parser {
       if(token.size() > 0){ 
         if(token.get(0).type == Lexer.TokenType.FunctionTok){
           ParseFunction(token,i,filename); 
-        } 
-        else if(token.get(0).type == Lexer.TokenType.ProgramTok){
+        } else if(token.get(0).type == Lexer.TokenType.ForTok){
+          ParseForLoop(token,i,filename); 
+        } else if(token.get(0).type == Lexer.TokenType.WhileTok){
+          ParseWhileLoop(token,i,filename);
+        } else if(token.get(0).type == Lexer.TokenType.ProgramTok){
           ParseProgName(token,i,filename); 
         }
       }//end token size check
@@ -65,8 +68,9 @@ public class Parser {
   public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
     String functionName = ""; 
     String returnType = ""; 
-    ArrayList<ArrayList<String>> functionArgs = new ArrayList<ArrayList<String>>(); //type = 0, name = 1
-    
+     
+    ArrayList<Pair<String,String>> functionArgs = new ArrayList<Pair<String,String>>();
+
     String err;
     
     if(LexInput.get(1).type == Lexer.TokenType.NameTok){
@@ -93,22 +97,37 @@ public class Parser {
       ParseErrorReport(lineNum,filename,err); 
       return; 
     }
-    functionArgs.add(new ArrayList<String>(Arrays.asList("","")));
-    
+     
+    functionArgs.add(new Pair<String,String>());
+    functionArgs.get(0).setA("");
+    functionArgs.get(0).setB("");
+
     int j = 0;
     int k = 0; 
     for(int i = 4; i < LexInput.size(); i++)
     {
       if(LexInput.get(i).type == Lexer.TokenType.NameTok){
-        if(k < functionArgs.get(j).size())
-          functionArgs.get(j).set(k,LexInput.get(i).data);
+        if(k > 0){
+          functionArgs.get(j).setB(LexInput.get(i).data);
+        }else{
+          functionArgs.get(j).setA(LexInput.get(i).data);
+        }
         k++;
       }else if(LexInput.get(i).type == Lexer.TokenType.TypeTok){
-        if(k < functionArgs.get(j).size()) 
-          functionArgs.get(j).set(k,LexInput.get(i).data);   
+        if(k == 0){ 
+          functionArgs.get(j).setA(LexInput.get(i).data);   
+        } else{
+          err = "Invalid function definition in arguemnt ";
+          err += j+1;
+          err += " (you cannot pass in a type as a variable)";
+          ParseErrorReport(lineNum,filename,err);
+        }
         k++; 
       }else if(LexInput.get(i).type == Lexer.TokenType.CommaTok){
-        functionArgs.add(new ArrayList<String>(Arrays.asList("",""))); 
+        functionArgs.add(new Pair<String,String>());
+        functionArgs.get(0).setA("");
+        functionArgs.get(0).setB(""); 
+        
         if(k != 2){ 
           err = "Invalid function definition in argument ";
           err += j+1;
@@ -118,7 +137,7 @@ public class Parser {
         }
         k = 0;   
         j++;
-      } else if(LexInput.get(i).type == Lexer.TokenType.EndParenTok){
+      } else if(LexInput.get(i).type == Lexer.TokenType.EndParenTok){    
         return;
       } else {
         err = "Invalid function definition in argument ";
@@ -129,11 +148,76 @@ public class Parser {
         return; 
       }
     }//end arg loop 
-  
-    System.out.println(functionName);  
-  
+   
   }//end ParseFunction
+  
+  public void ParseForLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+    String err = "";
+    String iter = "";
+    ArrayList<Lexer.Token> Collection = new ArrayList<Lexer.Token>(LexInput.size() - 3);
+    
+    if(LexInput.get(1).type == Lexer.TokenType.NameTok){
+      iter = LexInput.get(1).data; 
+    }else{
+      err = "Invalid iterator in FOR loop";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    }
 
+    if(LexInput.get(2).type != Lexer.TokenType.InTok){
+      err = "Invalid FOR loop declaration; iterator is incorrect";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    }
+    
+    for(int i = 3; i < LexInput.size(); i++)
+    {
+      //Copy the LexInput into Collection, minus the first 3 tokens
+      Collection.add(LexInput.get(i)); 
+    } 
+    //Parse Collection with the expression parser.
+  }//end Parse For loop
+
+  public void ParseWhileLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){ 
+    /* These conditions will be passed to the expression parser
+     * which can then better describe what exactly the while loop
+     * is doing */
+    
+    ArrayList<Lexer.Token> InitCondition = new ArrayList<Lexer.Token>(); 
+    ArrayList<Lexer.Token> TermCondition = new ArrayList<Lexer.Token>();
+    ArrayList<Lexer.Token> IterCondition = new ArrayList<Lexer.Token>();
+    
+    String err;
+
+    int j = 0;
+
+    if(LexInput.get(1).type != Lexer.TokenType.OpenParenTok){
+      err = "Parse Error: Invalid WHILE loop.  Parenthesis must folllow WHILE";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    }
+
+    for(int i = 2; i < LexInput.size() - 3; i++){
+      if(LexInput.get(i+j).type == Lexer.TokenType.SemicolonTok){ 
+        j++;
+      }
+      if(j == 0)
+        InitCondition.add(LexInput.get(i));
+      if(j == 1)
+        TermCondition.add(LexInput.get(i+1));
+      if(j == 2)
+        IterCondition.add(LexInput.get(i+2));
+      if(j > 2){
+        err = "Parse Error: Invalid WHILE loop. Too many semicolons";
+        ParseErrorReport(lineNum,filename,err);
+        return; 
+      }  
+    }//end LexInput loop
+
+    for(int i = 0; i < IterCondition.size(); i++)
+      System.out.println(IterCondition.get(i).data);
+
+  }//end Parse While Loop
 }//end class
 
 
