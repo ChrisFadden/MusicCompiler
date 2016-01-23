@@ -1,4 +1,10 @@
-PROGRAM Hello World INT x = 4
+PROGRAM Hello World
+    
+    FUNCTION void Hello(INT x, FLOAT y)
+      x = x*y;
+      RETURN;
+    END FUNCTION
+    
     INT x = 4;
     CHAR x = intersperse;
 END PROGRAM Hello World

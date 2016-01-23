@@ -119,7 +119,7 @@ GENERIC COLLECTION Vector<T>
 
 END GENERIC COLLECTION
 
-PROGRAM Language Example //This should cause an error
+PROGRAM Language Example
   
   #DEBUG("Before PrintHelloWorld")
   PrintHelloWorld();  
