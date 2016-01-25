@@ -100,13 +100,19 @@ public class Parser {
       return; 
     }
      
+    if(LexInput.get(LexInput.size()-1).type != Lexer.TokenType.EndParenTok){
+      err = "You forgot parenthesis at the end of your function definition\n";
+      err += "You may have also put invalid code after a function definition";
+      ParseErrorReport(lineNum,filename,err);    
+    }
+
     functionArgs.add(new Pair<String,String>());
     functionArgs.get(0).setA("");
     functionArgs.get(0).setB("");
 
     int j = 0;
     int k = 0; 
-    for(int i = 4; i < LexInput.size(); i++)
+    for(int i = 4; i < LexInput.size()-1; i++)
     {
       if(LexInput.get(i).type == Lexer.TokenType.NameTok){
         if(k > 0){
@@ -139,9 +145,7 @@ public class Parser {
         }
         k = 0;   
         j++;
-      } else if(LexInput.get(i).type == Lexer.TokenType.EndParenTok){    
-        return;
-      } else {
+        } else {
         err = "Invalid function definition in argument ";
         err += j+1;
         err += " invalid character: ";
@@ -167,7 +171,8 @@ public class Parser {
     }
 
     if(LexInput.get(2).type != Lexer.TokenType.InTok){
-      err = "Invalid FOR loop declaration; iterator is incorrect";
+      err = "Invalid FOR loop declaration\n";
+      err += "iterator is incorrect";
       ParseErrorReport(lineNum,filename,err);
       return; 
     }
@@ -194,7 +199,7 @@ public class Parser {
     int j = 0;
 
     if(LexInput.get(1).type != Lexer.TokenType.OpenParenTok){
-      err = "Parse Error: Invalid WHILE loop.  Parenthesis must folllow WHILE";
+      err = "Invalid WHILE loop\nParenthesis must folllow WHILE";
       ParseErrorReport(lineNum,filename,err);
       return; 
     }
@@ -210,7 +215,7 @@ public class Parser {
       if(j == 2)
         IterCondition.add(LexInput.get(i+2));
       if(j > 2){
-        err = "Parse Error: Invalid WHILE loop. Too many semicolons";
+        err = "Invalid WHILE loop\nToo many semicolons";
         ParseErrorReport(lineNum,filename,err);
         return; 
       }  
@@ -239,9 +244,6 @@ public class Parser {
         debugPrint += LexInput.get(i).data;
       }//end rehearse lex input
     }
-    
-    
-
   }//end Parse CompileDirective
 
 }//end class

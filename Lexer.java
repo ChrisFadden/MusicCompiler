@@ -10,8 +10,8 @@ public class Lexer {
     BinaryOpTok("[*|/|+|-|!]"),
     BooleanOpTok("(<=|>=|<|>|==|!=)"),
     EqualOpTok("(=)"),
-    WhitespaceTok("[ \t\f\r\n]+"),
-     
+    WhitespaceTok("[ \t\r\n\f]+ "), 
+
     //If tokens 
     IfTok("(IF)"),
     ElseifTok("(ELSEIF)"),
@@ -111,6 +111,8 @@ public class Lexer {
       for(TokenType tk : TokenType.values()){
         if(matcher.group(TokenType.WhitespaceTok.name()) != null)
           continue;
+        else if(matcher.group(TokenType.CommentTok.name()) != null)
+          return tokens;
         else if(matcher.group(tk.name()) != null){
           tokens.add(new Token(tk, matcher.group(tk.name())));
           break;
