@@ -29,7 +29,9 @@ public class Parser {
           ParseForLoop(token,i,filename); 
         } else if(token.get(0).type == Lexer.TokenType.WhileTok){
           ParseWhileLoop(token,i,filename);
-        } else if(token.get(0).type == Lexer.TokenType.ProgramTok){
+        } else if(token.get(0).type == Lexer.TokenType.HashTok){
+          ParseCompileDirective(token,i,filename);       
+        }else if(token.get(0).type == Lexer.TokenType.ProgramTok){
           ParseProgName(token,i,filename); 
         }
       }//end token size check
@@ -213,8 +215,35 @@ public class Parser {
         return; 
       }  
     }//end LexInput loop
-
   }//end Parse While Loop
+
+  public void ParseCompileDirective(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){ 
+    String err; 
+    String importedFilename = "";
+    String debugPrint = ""; 
+    int lineStartJazzBlock;
+    int lineEndJazzBlock;
+
+    if(LexInput.get(1).data.equals("remix")){ 
+      importedFilename = LexInput.get(2).data;
+      if(LexInput.get(LexInput.size()-1).type != Lexer.TokenType.SemicolonTok){
+        err = "Missing semicolon after import statement";
+        ParseErrorReport(lineNum,filename,err);
+      }
+    } else if(LexInput.get(1).data.equals("Jazz")){
+      lineStartJazzBlock = lineNum; 
+    } else if(LexInput.get(1).data.equals("end Jazz")){
+      lineEndJazzBlock = lineNum;
+    } else if(LexInput.get(1).data.equals("Rehearse")){
+      for(int i = 4; i < LexInput.size()-2; i++){
+        debugPrint += LexInput.get(i).data;
+      }//end rehearse lex input
+    }
+    
+    
+
+  }//end Parse CompileDirective
+
 }//end class
 
 

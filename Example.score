@@ -1,7 +1,7 @@
 
 //Compile (eventually) with:  compose file.score
 
-#import io;
+#remix io;
 
 FUNCTION void PrintHelloWorld()
 
@@ -121,7 +121,7 @@ END GENERIC COLLECTION
 
 PROGRAM Language Example
   
-  #DEBUG("Before PrintHelloWorld")
+  #Rehearse("Before PrintHelloWorld")
   PrintHelloWorld();  
   
   #Jazz //unsafe block
