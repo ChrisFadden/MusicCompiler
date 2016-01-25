@@ -214,9 +214,6 @@ public class Parser {
       }  
     }//end LexInput loop
 
-    for(int i = 0; i < IterCondition.size(); i++)
-      System.out.println(IterCondition.get(i).data);
-
   }//end Parse While Loop
 }//end class
 
