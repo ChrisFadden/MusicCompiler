@@ -31,6 +31,10 @@ public class Parser {
           ParseWhileLoop(token,i,filename);
         } else if(token.get(0).type == Lexer.TokenType.HashTok){
           ParseCompileDirective(token,i,filename);       
+        } else if(token.get(0).type == Lexer.TokenType.IfTok){
+          ParseIfStatement(token,i,filename);
+        } else if(token.get(0).type == Lexer.TokenType.ElseifTok){
+          ParseIfStatement(token,i,filename); 
         }else if(token.get(0).type == Lexer.TokenType.ProgramTok){
           ParseProgName(token,i,filename); 
         }
@@ -245,6 +249,38 @@ public class Parser {
       }//end rehearse lex input
     }
   }//end Parse CompileDirective
+  public void ParseIfStatement(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+    String err;
+    ArrayList<Lexer.Token> ifExpression = new ArrayList<Lexer.Token>(LexInput.size() - 3);
+    if(LexInput.get(1).type != Lexer.TokenType.OpenParenTok){
+      err = "You forgot an opening parenthesis in your IF/ELSEIF statement";
+      ParseErrorReport(lineNum,filename,err);
+    }
+    if(LexInput.get(LexInput.size()-1).type != Lexer.TokenType.EndParenTok){
+      err = "You forget a closing parenthesis in your IF/ELSEIF statement"; 
+      ParseErrorReport(lineNum,filename,err); 
+    }
+    
+    for(int i = 2; i < LexInput.size()-1; i++){
+      ifExpression.add(LexInput.get(i));
+    }
+
+  }//end Parse If Statement
+  
+  public void ParseCollectionName(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+    String err;
+    String collectionName;
+    
+    if(LexInput.get(1).type != Lexer.TokenType.NameTok){
+      err = "Invalid Collection Name";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    }
+
+    collectionName = LexInput.get(1).data;
+    
+    return;
+  }//end Parse Collection
 
 }//end class
 
