@@ -35,6 +35,8 @@ public class Parser {
           ParseIfStatement(token,i,filename);
         } else if(token.get(0).type == Lexer.TokenType.ElseifTok){
           ParseIfStatement(token,i,filename); 
+        } else if(token.get(0).type == Lexer.TokenType.CollectionTok){
+          ParseCollectionName(token,i,filename);
         }else if(token.get(0).type == Lexer.TokenType.ProgramTok){
           ParseProgName(token,i,filename); 
         }
