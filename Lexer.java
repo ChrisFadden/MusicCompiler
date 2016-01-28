@@ -66,7 +66,6 @@ public class Lexer {
     QuoteTok("(\")"),
     SemicolonTok("(;)"),
     AtTok("(@)"),
-    ExclamationMarkTok("(!)"),
     DollarSignTok("(\\$)"),
     PercentTok("(%)"),
     CarotTok("\\^"),

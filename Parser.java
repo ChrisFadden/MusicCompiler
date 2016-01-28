@@ -37,8 +37,14 @@ public class Parser {
           ParseIfStatement(token,i,filename); 
         } else if(token.get(0).type == Lexer.TokenType.CollectionTok){
           ParseCollectionName(token,i,filename);
-        }else if(token.get(0).type == Lexer.TokenType.ProgramTok){
+        } else if(token.get(0).type == Lexer.TokenType.ProgramTok){
           ParseProgName(token,i,filename); 
+        } else if(token.get(0).type == Lexer.TokenType.EndifTok){
+        } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){
+        } else if(token.get(0).type == Lexer.TokenType.EndForTok){
+        } else if(token.get(0).type == Lexer.TokenType.EndWhileTok){
+        } else {
+          ParseExpression(token,i,filename); 
         }
       }//end token size check
       i++;
@@ -131,7 +137,7 @@ public class Parser {
         if(k == 0){ 
           functionArgs.get(j).setA(LexInput.get(i).data);   
         } else{
-          err = "Invalid function definition in arguemnt ";
+          err = "Invalid function definition in argument ";
           err += j+1;
           err += " (you cannot pass in a type as a variable)";
           ParseErrorReport(lineNum,filename,err);
@@ -283,6 +289,171 @@ public class Parser {
     
     return;
   }//end Parse Collection
+    
+  public void ParseExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+    int i = 0; 
+    for(Lexer.Token tk : LexInput){
+      if(tk.type == Lexer.TokenType.EqualOpTok){
+        ParseEqualExpression(LexInput,lineNum,filename,i);
+        return; 
+      }else if(tk.type == Lexer.TokenType.OpenParenTok){
+        ParseOpenParenExpression(LexInput,lineNum,filename,i);
+        return; 
+      }else if(tk.type == Lexer.TokenType.BooleanOpTok){
+        ParseBooleanExpression(LexInput,lineNum,filename,i);
+        return;
+      } else if(tk.type == Lexer.TokenType.BinaryOpTok){
+        ParseArithmeticExpression(LexInput,lineNum,filename,i);
+        return; 
+      } else if(tk.type == Lexer.TokenType.CommaTok){
+        ParseCommaExpression(LexInput,lineNum,filename,i); 
+        return;
+      }
+      i++;
+    }
+
+  }//end Parse Expression
+  
+  public void ParseEqualExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    int equalIndex = i;
+    boolean equalOp = false;
+    String err;
+    
+    for(int j = i+1; j < LexInput.size(); j++){
+      if(LexInput.get(j).type == Lexer.TokenType.EqualOpTok){ 
+        err = "You cannot have more than one equal sign in an expression";
+        ParseErrorReport(lineNum,filename,err);  
+      }
+    }
+
+    ArrayList<Lexer.Token> leftEqualOpArray = new ArrayList<Lexer.Token>(equalIndex);
+    ArrayList<Lexer.Token> rightEqualOpArray = new ArrayList<Lexer.Token>(LexInput.size() - equalIndex - 2);
+
+    for(int j = 0; i < equalIndex; j++){
+      leftEqualOpArray.add(LexInput.get(j));
+    }
+
+    for(int j = equalIndex+1; j < LexInput.size(); j++){ 
+      rightEqualOpArray.add(LexInput.get(j));
+    }
+
+    ParseExpression(rightEqualOpArray,lineNum,filename);
+    ParseExpression(leftEqualOpArray,lineNum,filename);
+
+  }//end ParseEqualExpression
+
+  public void ParseBooleanExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    int boolIndex = i;
+    String err;
+    
+    if(LexInput.size() - boolIndex - 2 >= 0){
+      ArrayList<Lexer.Token> leftBoolOpArray = new ArrayList<Lexer.Token>(boolIndex);
+      ArrayList<Lexer.Token> rightBoolOpArray = new ArrayList<Lexer.Token>(LexInput.size() - boolIndex - 2);
+
+      for(int j = 0; j < boolIndex; j++){
+        leftBoolOpArray.add(LexInput.get(j));
+      }
+
+      for(int j = boolIndex+1; j < LexInput.size(); j++){ 
+        rightBoolOpArray.add(LexInput.get(j));
+      }
+
+      ParseExpression(rightBoolOpArray,lineNum,filename);
+      ParseExpression(leftBoolOpArray,lineNum,filename);
+    } else{
+      err = "Invalid boolean expression";
+      ParseErrorReport(lineNum,filename,err);
+    }
+  }//end Parse Boolean Expression
+
+  public void ParseArithmeticExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    int arithIndex = i;
+    String err;
+    
+    if((LexInput.size() - arithIndex - 2) >= 0){
+      ArrayList<Lexer.Token> leftArithOpArray = new ArrayList<Lexer.Token>(arithIndex);
+      ArrayList<Lexer.Token> rightArithOpArray = new ArrayList<Lexer.Token>(LexInput.size() - arithIndex - 2);
+
+      for(int j = 0; j < arithIndex; j++){
+        leftArithOpArray.add(LexInput.get(j));
+      }
+
+      for(int j = arithIndex+1; j < LexInput.size(); j++){ 
+        rightArithOpArray.add(LexInput.get(j));
+      }
+
+      ParseExpression(rightArithOpArray,lineNum,filename);
+      ParseExpression(leftArithOpArray,lineNum,filename);
+    } else {
+      err = "Invalid arithmetic expression";
+      ParseErrorReport(lineNum,filename,err);
+    }
+  }//end Parse Arithmetic Expression
+  
+  public void ParseOpenParenExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){ 
+    if(i > 0){
+      //Parenthesis corresponds to a function call
+      if(LexInput.get(i-1).type == Lexer.TokenType.NameTok){
+        int endFuncCallIndex = i+1; 
+        for(int j = i+1; j < LexInput.size(); j++){
+          if(LexInput.get(j).type == Lexer.TokenType.EndParenTok){
+            endFuncCallIndex = j;
+          }
+        }
+        ArrayList<Lexer.Token> funcCallArray = new ArrayList<Lexer.Token>(endFuncCallIndex - (i-1));
+          for(int j = i-1; j < endFuncCallIndex; j++){
+            funcCallArray.add(LexInput.get(j));
+          }
+        ParseFunctionCallExpression(funcCallArray,lineNum,filename);
+        return;
+      } else {
+        //nested in the expression is a ( , that isn't a function call 
+        ArrayList<Lexer.Token> expression = new ArrayList<Lexer.Token>(LexInput.subList(i+1,LexInput.size()));
+        ParseExpression(expression,lineNum,filename);  
+        return; 
+      }
+    } else {
+      //Expression starts with a (
+      ArrayList<Lexer.Token> expression = new ArrayList<Lexer.Token>(LexInput.subList(i+1,LexInput.size()));
+      ParseExpression(expression,lineNum,filename); 
+      return; 
+    }
+  }//end Parse OpenParen Expression
+  
+  //This does just call ParseExpression, but it will return a FunctionAST.
+  public void ParseFunctionCallExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+      String err; 
+      if(LexInput.size() >= 2){ 
+        String functionName = LexInput.get(0).data;
+        ArrayList<Lexer.Token> functionExpression = new ArrayList<Lexer.Token>(LexInput.subList(2,LexInput.size())); 
+        ParseExpression(functionExpression,lineNum,filename); 
+      } else{
+        err = "Invalid function call expression";
+        ParseErrorReport(lineNum,filename,err);
+      }
+    return;
+  }//end ParseFunction Call
+
+  public void ParseCommaExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    int commaIndex = i;
+    String err;
+    
+    if((LexInput.size() - commaIndex - 2) >= 0){
+      ArrayList<Lexer.Token> leftCommaArray = new ArrayList<Lexer.Token>(commaIndex);
+      ArrayList<Lexer.Token> rightCommaArray = new ArrayList<Lexer.Token>(LexInput.size() - commaIndex - 2);
+
+      for(int j = 0; j < commaIndex; j++){
+        leftCommaArray.add(LexInput.get(j));
+      }
+
+      for(int j = commaIndex+1; j < LexInput.size(); j++){ 
+        rightCommaArray.add(LexInput.get(j));
+      }
+    } else {
+      err = "Misplaced comma";
+      ParseErrorReport(lineNum,filename,err);
+    }
+  }//end Parse Comma Expression
 
 }//end class
 
