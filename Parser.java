@@ -308,6 +308,10 @@ public class Parser {
       } else if(tk.type == Lexer.TokenType.CommaTok){
         ParseCommaExpression(LexInput,lineNum,filename,i); 
         return;
+      } else if(tk.type == Lexer.TokenType.ColonTok){
+        ParseColonExpression(LexInput,lineNum,filename,i);
+      } else if(tk.type == Lexer.TokenType.DotTok){
+        ParseDotExpression(LexInput,lineNum,filename,i);
       }
       i++;
     }
@@ -454,7 +458,43 @@ public class Parser {
       ParseErrorReport(lineNum,filename,err);
     }
   }//end Parse Comma Expression
+  
+  public void ParseColonExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    String err; 
+    String scope; 
+    if(i > 0 && LexInput.size() > i+1){
+      scope = LexInput.get(i-1).data; 
+      if(LexInput.get(i+1).type != Lexer.TokenType.ColonTok){
+        //Could be a range 
+      }
+      ArrayList<Lexer.Token> scopedExpression = new ArrayList<Lexer.Token>(LexInput.subList(2,LexInput.size()));
+      ParseExpression(scopedExpression,lineNum,filename);
+    }else {
+      err = "Invalid Scope or Range operator";
+      ParseErrorReport(lineNum,filename,err);
+    }
+    return;
+  }//end Parse Colon Expression
+  
+  public void ParseDotExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    String err;
+    
+    if(LexInput.size() - i - 2 >= 0){
+      ArrayList<Lexer.Token> leftDotArray = new ArrayList<Lexer.Token>(i);
+      ArrayList<Lexer.Token> rightDotArray = new ArrayList<Lexer.Token>(LexInput.size() - i - 2);
+       
+      for(int j = 0; j < i; j++){
+        leftDotArray.add(LexInput.get(j));
+      }
 
+      for(int j = i+1; j < LexInput.size(); j++){ 
+        rightDotArray.add(LexInput.get(j));
+      }
+    } else {
+      err = "Misplaced period";
+      ParseErrorReport(lineNum,filename,err);
+    }
+  }//end ParseDot Expression 
 }//end class
 
 
