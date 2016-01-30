@@ -80,6 +80,7 @@ public class Parser {
   }//end ParseProgName
   
   public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+    //Make Strings something other than empty.  something like "never set" or similar... 
     String functionName = ""; 
     String returnType = ""; 
     
@@ -222,8 +223,8 @@ public class Parser {
         mutableArgs.add(j); 
       } else if(LexInput.get(i).type == Lexer.TokenType.CommaTok){
           functionArgs.add(new Pair<String,String>());
-          functionArgs.get(0).setA("");
-          functionArgs.get(0).setB(""); 
+          functionArgs.get(j+1).setA("");
+          functionArgs.get(j+1).setB(""); 
         
           if(k != 2){ 
             err = "Invalid function definition in argument ";
@@ -244,7 +245,11 @@ public class Parser {
       }
       i++;
     }//end arg loop 
-   
+    
+    for(Pair<String,String> arg : functionArgs){
+      System.out.println(arg.getA());
+    }
+
   }//end ParseFunction
   
   public void ParseForLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
@@ -388,6 +393,8 @@ public class Parser {
         return;
       } else if(tk.type == Lexer.TokenType.ScopeTok){
         ParseScopeExpression(LexInput,lineNum,filename,i);
+      } else if(tk.type == Lexer.TokenType.ColonTok){
+        ParseColonExpression(LexInput,lineNum,filename,i);      
       } else if(tk.type == Lexer.TokenType.DotTok){
         ParseDotExpression(LexInput,lineNum,filename,i);
       }
@@ -551,6 +558,34 @@ public class Parser {
     return;
   }//end Parse Colon Expression
   
+  public void ParseColonExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+    //for now just assume its numbers in the range 
+    String err;
+    double start;
+    double stride;
+    double stop;
+    if(i > 0 && LexInput.size() > i+1){
+      start = Double.parseDouble(LexInput.get(i-1).data);
+      if(LexInput.size() > i+3){
+        //1:4:10
+        stride = Double.parseDouble(LexInput.get(i+1).data);
+        stop = Double.parseDouble(LexInput.get(i+3).data);
+        if(LexInput.get(i+2).type != Lexer.TokenType.ColonTok){
+          err = "Expected : before stop condition of range";
+          ParseErrorReport(lineNum,filename,err);
+        }
+      } else{
+        stride = 1;
+        stop = Double.parseDouble(LexInput.get(i+1).data);
+      }
+    } else {
+      err = "Invalid Range operator";
+      ParseErrorReport(lineNum,filename,err);
+    }
+    
+    return;
+  }
+
   public void ParseDotExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
     String err;
     

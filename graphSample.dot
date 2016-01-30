@@ -1,0 +1,7 @@
+digraph G{
+  main -> subnode1;
+  main -> subnode2;
+  subnode2 -> p1;
+  subnode2 -> p2;
+  subnode2 -> p3;
+}
