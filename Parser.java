@@ -43,7 +43,9 @@ public class Parser {
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){
         } else if(token.get(0).type == Lexer.TokenType.EndForTok){
         } else if(token.get(0).type == Lexer.TokenType.EndWhileTok){
-        } else {
+        } else if(token.get(0).data.equals("GENERIC")){ 
+          ParseGenericCollectionName(token,i,filename);
+        }else {
           ParseExpression(token,i,filename); 
         }
       }//end token size check
@@ -605,6 +607,66 @@ public class Parser {
       ParseErrorReport(lineNum,filename,err);
     }
   }//end ParseDot Expression 
+  
+  public void ParseGenericCollectionName(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+    String err = "";
+    String collectionName = "";
+    
+    if(LexInput.size() < 6){
+      err = "Invalid Generic Collection Statement";
+      ParseErrorReport(lineNum,filename,err);
+      return;
+    }
+
+    if(LexInput.get(1).type != Lexer.TokenType.CollectionTok){
+      err = "Invalid generic statement.\n";
+      err += "\tCannot have generics in an expression outside a function";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    }
+    
+    if(LexInput.get(2).type != Lexer.TokenType.NameTok){
+      if(LexInput.get(2).type != Lexer.TokenType.TypeTok){
+        err = "Invalid name in generic collection name";
+        ParseErrorReport(lineNum,filename,err);
+        return;
+      }
+    }
+    
+    collectionName += LexInput.get(2).data;
+
+    if(LexInput.get(3).data.equals("<")){
+      collectionName += LexInput.get(3).data;
+    } else {
+      err = "Invalid type in generic collection name\n";
+      err += "Expected < before type";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    }
+    
+    collectionName += LexInput.get(3).data;
+
+    if(LexInput.get(4).type != Lexer.TokenType.NameTok){
+      if(LexInput.get(4).type != Lexer.TokenType.TypeTok){
+        err = "Invalid type in generic collection name";
+        ParseErrorReport(lineNum,filename,err);
+        return;
+      }
+    }
+
+    collectionName += LexInput.get(4).data;
+
+    if(LexInput.get(5).data.equals(">")){
+      collectionName += LexInput.get(5).data;
+    } else {
+      err = "Invalid type in generic collection name\n";
+      err += "Expected > after type";
+      ParseErrorReport(lineNum,filename,err);
+      return; 
+    } 
+    
+    return;
+  }//end Parse Collection
 }//end class
 
 
