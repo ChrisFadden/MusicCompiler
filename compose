@@ -1,0 +1,10 @@
+#! /bin/bash
+
+fileName=${1%.*}
+dotExt=".dot"
+pngExt=".png"
+java Music $1
+dot -Tpng $fileName$dotExt -o $fileName$pngExt
+rm $fileName$dotExt 
+ristretto $fileName$pngExt
+rm $fileName$pngExt

@@ -247,11 +247,6 @@ public class Parser {
       }
       i++;
     }//end arg loop 
-    
-    for(Pair<String,String> arg : functionArgs){
-      System.out.println(arg.getA());
-    }
-
   }//end ParseFunction
   
   public void ParseForLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
