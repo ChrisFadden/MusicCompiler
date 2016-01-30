@@ -11,7 +11,7 @@ public class Parser {
   private ArrayList<ArrayList<Lexer.Token>> unchangedLexInput;
   //private ArrayList<ArrayList<Lexer.Token>> lexInput;
   
-  private String ProgramName;
+  private String ProgramName; 
 
   public Parser(ArrayList<ArrayList<Lexer.Token>> tokens, String filename){     
     unchangedLexInput = tokens;
@@ -21,7 +21,7 @@ public class Parser {
     
     int i = 1;
     for(ArrayList<Lexer.Token> token : unchangedLexInput)
-    {
+    { 
       if(token.size() > 0){ 
         if(token.get(0).type == Lexer.TokenType.FunctionTok){
           ParseFunction(token,i,filename); 
@@ -82,34 +82,75 @@ public class Parser {
   public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
     String functionName = ""; 
     String returnType = ""; 
-     
+    
     ArrayList<Pair<String,String>> functionArgs = new ArrayList<Pair<String,String>>();
+    int lexNum = 2;
+    ArrayList<Integer> mutableArgs = new ArrayList<Integer>();
 
     String err;
     
+    if(LexInput.size() < 1){
+      err = "Invalid function definition";
+      ParseErrorReport(lineNum,filename,err);
+      return;
+    }
+
     if(LexInput.get(1).type == Lexer.TokenType.NameTok){
       returnType = LexInput.get(1).data; 
     } else if (LexInput.get(1).type == Lexer.TokenType.TypeTok){
-      returnType = LexInput.get(1).data; 
+      if(LexInput.get(1).data.equals("GENERIC<")){
+        if(LexInput.size() < 3){
+          err = "Invalid generic in function return type";
+          ParseErrorReport(lineNum,filename,err);
+          return;
+        }
+        
+        returnType = LexInput.get(1).data;
+        returnType += LexInput.get(2).data;
+        returnType += LexInput.get(3).data;
+        lexNum += 2;
+      } else{ 
+        returnType = LexInput.get(1).data; 
+      } 
     } else {
       err = "Invalid return type";
       ParseErrorReport(lineNum,filename,err);
       return; 
     }
   
-    if(LexInput.get(2).type == Lexer.TokenType.NameTok){
-      functionName = LexInput.get(2).data; 
+    if(LexInput.get(lexNum).type == Lexer.TokenType.NameTok){
+      functionName = LexInput.get(lexNum).data; 
+    } else if(LexInput.get(lexNum).type == Lexer.TokenType.CarotTok){
+        returnType += LexInput.get(lexNum).data;
+        lexNum++;
+      if(LexInput.get(lexNum).type == Lexer.TokenType.NameTok){
+        functionName = LexInput.get(lexNum).data; 
+      } else {
+        err = "Invalid Function Name";
+        ParseErrorReport(lineNum,filename,err); 
+        return;
+      }
     } else {  
       err = "Invalid Function Name";
       ParseErrorReport(lineNum,filename,err); 
       return; 
     }
-    
-    if(LexInput.get(3).type != Lexer.TokenType.OpenParenTok)
-    { 
-      err = "You forgot parenthesis in your function definition";
+     
+    if(LexInput.get(lexNum+1).type != Lexer.TokenType.OpenParenTok){
+      if(LexInput.get(lexNum+1).type == Lexer.TokenType.BinaryOpTok){
+        functionName += LexInput.get(lexNum+1).data; 
+        lexNum++;
+      } else if(LexInput.get(lexNum+1).type == Lexer.TokenType.BooleanOpTok){
+        functionName += LexInput.get(lexNum+1).data; 
+        lexNum++;
+      } else if(LexInput.get(lexNum+1).type == Lexer.TokenType.EqualOpTok){
+        functionName += LexInput.get(lexNum+1).data;
+        lexNum++; 
+      } else{
+      err = "You forgot opening parenthesis in your function definition";
       ParseErrorReport(lineNum,filename,err); 
       return; 
+      }
     }
      
     if(LexInput.get(LexInput.size()-1).type != Lexer.TokenType.EndParenTok){
@@ -123,8 +164,9 @@ public class Parser {
     functionArgs.get(0).setB("");
 
     int j = 0;
-    int k = 0; 
-    for(int i = 4; i < LexInput.size()-1; i++)
+    int k = 0;
+    int i = lexNum+2;
+    while(i < LexInput.size()-1)
     {
       if(LexInput.get(i).type == Lexer.TokenType.NameTok){
         if(k > 0){
@@ -133,31 +175,66 @@ public class Parser {
           functionArgs.get(j).setA(LexInput.get(i).data);
         }
         k++;
-      }else if(LexInput.get(i).type == Lexer.TokenType.TypeTok){
-        if(k == 0){ 
-          functionArgs.get(j).setA(LexInput.get(i).data);   
-        } else{
-          err = "Invalid function definition in argument ";
-          err += j+1;
-          err += " (you cannot pass in a type as a variable)";
-          ParseErrorReport(lineNum,filename,err);
-        }
-        k++; 
-      }else if(LexInput.get(i).type == Lexer.TokenType.CommaTok){
-        functionArgs.add(new Pair<String,String>());
-        functionArgs.get(0).setA("");
-        functionArgs.get(0).setB(""); 
+      } else if(LexInput.get(i).type == Lexer.TokenType.TypeTok){
+          if(k == 0){ 
+            String arg1 = LexInput.get(i).data;
+            if(LexInput.get(i).data.equals("GENERIC<")){  
+              if(LexInput.size() < i+3){
+                err = "Invalid Generic in function definition";
+                ParseErrorReport(lineNum,filename,err);
+              }
+              i++;
+              if(LexInput.get(i).type == Lexer.TokenType.TypeTok){
+                arg1 += LexInput.get(i).data;
+                i++;
+                if(LexInput.get(i).data.equals(">")){
+                  arg1 += LexInput.get(i).data; 
+                  i++;
+                } else{
+                  err = "Invalid Generic declaration in arg: ";
+                  err += j;
+                  err += " of function call";
+                  ParseErrorReport(lineNum,filename,err);
+                }
+              } else if(LexInput.get(i).type == Lexer.TokenType.NameTok){
+                arg1 += LexInput.get(i).data; 
+                i++;
+                if(LexInput.get(i).data.equals(">")){
+                  arg1 += LexInput.get(i).data; 
+                  i++;
+                } else{
+                  err = "Invalid Generic declaration in arg: ";
+                  err += j;
+                  err += " of function call";
+                  ParseErrorReport(lineNum,filename,err);
+                } 
+              }
+            }
+            functionArgs.get(j).setA(arg1);   
+          } else{
+            err = "Invalid function definition in argument ";
+            err += j+1;
+            err += " (you cannot pass in a type as a variable)";
+            ParseErrorReport(lineNum,filename,err);
+          }
+        k++;
+      } else if(LexInput.get(i).type == Lexer.TokenType.MutableTok){
+        mutableArgs.add(j); 
+      } else if(LexInput.get(i).type == Lexer.TokenType.CommaTok){
+          functionArgs.add(new Pair<String,String>());
+          functionArgs.get(0).setA("");
+          functionArgs.get(0).setB(""); 
         
-        if(k != 2){ 
-          err = "Invalid function definition in argument ";
-          err += j+1;
-          err += " (mismatch between types and variables)";
-          ParseErrorReport(lineNum,filename,err); 
-          return; 
-        }
-        k = 0;   
-        j++;
-        } else {
+          if(k != 2){ 
+            err = "Invalid function definition in argument ";
+            err += j+1;
+            err += " (mismatch between types and variables)";
+            ParseErrorReport(lineNum,filename,err); 
+            return; 
+          }
+          k = 0;   
+          j++; 
+      }  else { 
         err = "Invalid function definition in argument ";
         err += j+1;
         err += " invalid character: ";
@@ -165,6 +242,7 @@ public class Parser {
         ParseErrorReport(lineNum,filename,err);
         return; 
       }
+      i++;
     }//end arg loop 
    
   }//end ParseFunction
@@ -308,8 +386,8 @@ public class Parser {
       } else if(tk.type == Lexer.TokenType.CommaTok){
         ParseCommaExpression(LexInput,lineNum,filename,i); 
         return;
-      } else if(tk.type == Lexer.TokenType.ColonTok){
-        ParseColonExpression(LexInput,lineNum,filename,i);
+      } else if(tk.type == Lexer.TokenType.ScopeTok){
+        ParseScopeExpression(LexInput,lineNum,filename,i);
       } else if(tk.type == Lexer.TokenType.DotTok){
         ParseDotExpression(LexInput,lineNum,filename,i);
       }
@@ -459,18 +537,15 @@ public class Parser {
     }
   }//end Parse Comma Expression
   
-  public void ParseColonExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+  public void ParseScopeExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
     String err; 
-    String scope; 
+    String scope;
     if(i > 0 && LexInput.size() > i+1){
-      scope = LexInput.get(i-1).data; 
-      if(LexInput.get(i+1).type != Lexer.TokenType.ColonTok){
-        //Could be a range 
-      }
+      scope = LexInput.get(i-1).data;  
       ArrayList<Lexer.Token> scopedExpression = new ArrayList<Lexer.Token>(LexInput.subList(2,LexInput.size()));
       ParseExpression(scopedExpression,lineNum,filename);
-    }else {
-      err = "Invalid Scope or Range operator";
+    }else { 
+      err = "Invalid Scope operator";
       ParseErrorReport(lineNum,filename,err);
     }
     return;

@@ -3,9 +3,9 @@
 
 #remix io;
 
-FUNCTION void PrintHelloWorld()
+FUNCTION void PrintHelloWorld(INT x,) //trailing commas don't cause errors.  but they should
 
-  io::println("Hello World");
+  io::print_ln("Hello World");
 
 END FUNCTION
 
@@ -68,7 +68,7 @@ COLLECTION CustomType
   END FUNCTION
   
   //What to do if on lhs of equal sign.
-  FUNCTION VOID operator=(SELF,CustomType rhs)
+  FUNCTION VOID operator=(CustomType rhs)
     self.a = rhs.a;
     self.b = rhs.b;
     self.c = 1;
@@ -84,11 +84,11 @@ COLLECTION CustomType
     RETURN THIS;
   END FUNCTION
 
-  /*What to do if on rhs of equal sign.  If both objects
-   *overload the equal operator, whatever is on the right
-   *side of the equal sign takes precedence and a warning
-   * is emitted
-   */
+   //What to do if on rhs of equal sign.  If both objects
+   //overload the equal operator, whatever is on the right
+   //side of the equal sign takes precedence and a warning
+   // is emitted
+   //
   FUNCTION VOID operator=(MUTABLE CustomType lhs, SELF)
     lhs.a = self.a
     lhs.b = self.b
@@ -98,7 +98,7 @@ COLLECTION CustomType
 END COLLECTION
 
 //GENERIC specifies it can be any type, like templates or generics
-FUNCTION void GenericFunction(GENERIC<T> a)
+FUNCTION VOID GenericFunction(GENERIC<T> a)
   GENERIC<T> b = a + a; //type of b will be whatever a is
 END FUNCTION
 

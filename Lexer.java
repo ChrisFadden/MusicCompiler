@@ -4,21 +4,12 @@ import java.util.regex.Matcher;
 
 public class Lexer {
   public static enum TokenType {
-    //Number/Operation Tokens
-    NumberTok("-?[0-9]+"),
-    CommentTok("(//)"),
-    BinaryOpTok("[*|/|+|-|!]"),
-    BooleanOpTok("(<=|>=|<|>|==|!=)"),
-    EqualOpTok("(=)"),
-    WhitespaceTok("[ \t\r\n\f]+ "), 
-
     //If tokens 
     IfTok("(IF)"),
     ElseifTok("(ELSEIF)"),
     ElseTok("(ELSE)"),
     EndifTok("(END IF)"),
-    
-    
+     
     //Function Tokens
     FunctionTok("(FUNCTION)"),
     EndFunctionTok("(END FUNCTION)"),
@@ -27,8 +18,6 @@ public class Lexer {
     //Class Tokens
     CollectionTok("(COLLECTION)"),
     EndCollectionTok("(END COLLECTION)"),
-    SelfTok("(SELF)"),
-    ThisTok("(THIS)"),
 
     //Program tokens
     ProgramTok("(PROGRAM)"),
@@ -39,8 +28,9 @@ public class Lexer {
     NullptrTok("(NULLPTR)"),
      
     //Type Tokens
-    TypeTok("(INT|DOUBLE|CHAR|BOOL|GENERIC|AUTO)"),
- 
+    TypeTok("(INT|DOUBLE|CHAR|BOOL|GENERIC<|AUTO|VOID)"),
+    MutableTok("(MUTABLE)"),
+
     //Loop tokens
     ForTok("(FOR)"),
     WhileTok("(WHILE)"),
@@ -53,6 +43,14 @@ public class Lexer {
     
     //Compiler Directive Tokens
     HashTok("(#)"),
+    
+    //Number/Operation Tokens
+    NumberTok("-?[0-9]+"),
+    CommentTok("(//)"),
+    BinaryOpTok("[*|/|+|-|!]"),
+    BooleanOpTok("(<=|>=|<|>|==|!=)"),
+    EqualOpTok("(=)"),
+    WhitespaceTok("[ \t\r\n\f]+ "), 
 
     //Character Tokens
     OpenParenTok("[(]"),
@@ -62,6 +60,7 @@ public class Lexer {
     OpenBraceTok("(\\{)"),
     EndBraceTok("(\\})"),
     CommaTok("(,)"),
+    ScopeTok("(::)"), 
     ColonTok("(:)"), 
     QuoteTok("(\")"),
     SemicolonTok("(;)"),
