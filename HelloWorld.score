@@ -1,6 +1,6 @@
 PROGRAM Hello World
     
-    FUNCTION void Hello(INT x, FLOAT y) //no error
+    FUNCTION VOID Hello(INT x, FLOAT y) //no error
       x = x*y;
       RETURN;
     END FUNCTION

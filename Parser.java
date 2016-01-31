@@ -5,6 +5,8 @@
 
 import java.util.*;
 import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Parser {
   
@@ -13,18 +15,18 @@ public class Parser {
   
   private String ProgramName; 
 
-  public Parser(ArrayList<ArrayList<Lexer.Token>> tokens, String filename){     
+  public Parser(ArrayList<ArrayList<Lexer.Token>> tokens, String filename, FileWriter writer) throws IOException{     
     unchangedLexInput = tokens;
     //lexInput = tokens;
        
     ProgramName = "";
-    
+    AstProgramNode program = new AstProgramNode(writer);
     int i = 1;
     for(ArrayList<Lexer.Token> token : unchangedLexInput)
     { 
       if(token.size() > 0){ 
         if(token.get(0).type == Lexer.TokenType.FunctionTok){
-          ParseFunction(token,i,filename); 
+          ParseFunction(token,i,filename,program); 
         } else if(token.get(0).type == Lexer.TokenType.ForTok){
           ParseForLoop(token,i,filename); 
         } else if(token.get(0).type == Lexer.TokenType.WhileTok){
@@ -37,8 +39,8 @@ public class Parser {
           ParseIfStatement(token,i,filename); 
         } else if(token.get(0).type == Lexer.TokenType.CollectionTok){
           ParseCollectionName(token,i,filename);
-        } else if(token.get(0).type == Lexer.TokenType.ProgramTok){
-          ParseProgName(token,i,filename); 
+        } else if(token.get(0).type == Lexer.TokenType.ProgramTok){ 
+          ParseProgName(token,i,filename,program); 
         } else if(token.get(0).type == Lexer.TokenType.EndifTok){
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){
         } else if(token.get(0).type == Lexer.TokenType.EndForTok){
@@ -51,6 +53,7 @@ public class Parser {
       }//end token size check
       i++;
     }//end Lex loop
+    program.makeGraph();
   }//end Parser constructor
   
   public void ParseErrorReport(int lineNum, String filename, String err){
@@ -65,7 +68,7 @@ public class Parser {
     return;
   }
 
-  public void ParseProgName(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){  
+  public void ParseProgName(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstProgramNode program){  
     
     String err;
     
@@ -78,10 +81,13 @@ public class Parser {
           ParseErrorReport(lineNum,filename,err);
         break;      
       }
-    }//end token array loop  
+    }//end token array loop 
+
+    program.setName(ProgramName,lineNum);
+
   }//end ParseProgName
   
-  public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+  public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstProgramNode program){
     //Make Strings something other than empty.  something like "never set" or similar... 
     String functionName = ""; 
     String returnType = ""; 
@@ -89,7 +95,8 @@ public class Parser {
     ArrayList<Pair<String,String>> functionArgs = new ArrayList<Pair<String,String>>();
     int lexNum = 2;
     ArrayList<Integer> mutableArgs = new ArrayList<Integer>();
-
+    AstFunctionNode func = new AstFunctionNode(program.getFileWriter()); 
+    
     String err;
     
     if(LexInput.size() < 1){
@@ -161,6 +168,13 @@ public class Parser {
       err += "You may have also put invalid code after a function definition";
       ParseErrorReport(lineNum,filename,err);    
     }
+    
+    func.setName(functionName,lineNum);
+    AstVariableNode returnNode = new AstVariableNode(lineNum);
+    returnNode.setName("Returned Variable");
+    returnNode.setType(returnType);
+    
+    func.addChild(returnNode);
 
     functionArgs.add(new Pair<String,String>());
     functionArgs.get(0).setA("");
@@ -247,6 +261,13 @@ public class Parser {
       }
       i++;
     }//end arg loop 
+    for(Pair<String,String>arg : functionArgs){  
+      AstVariableNode argNode = new AstVariableNode(lineNum);
+      argNode.setType(arg.getA());
+      argNode.setName(arg.getB()); 
+      func.addChild(argNode);
+    }
+    program.addChild(func);
   }//end ParseFunction
   
   public void ParseForLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){

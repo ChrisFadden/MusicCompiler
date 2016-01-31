@@ -20,10 +20,11 @@ public class AstNode {
     Error;
   }//end enum
   
-  protected ArrayList<AstNode> children;
-  protected FileWriter writer; 
-  protected String name;
+  public ArrayList<AstNode> children;
+  public FileWriter writer; 
+  public String name;
   
+  public AstNode(){}
   public AstNode(FileWriter filename, int lineNumber){
     writer = filename;
     name = "\"Default(";
@@ -38,6 +39,7 @@ public class AstNode {
       writer.write(" -> ");
       writer.write(node.getName());
       writer.write("\r\n");
+      node.makeGraph(); 
     } 
   }
   
@@ -51,8 +53,7 @@ public class AstNode {
   
   public String getName(){
     return name;
-  }
-
+  } 
 }
 
 

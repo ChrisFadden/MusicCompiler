@@ -3,7 +3,7 @@
 
 #remix io;
 
-FUNCTION void PrintHelloWorld(INT x,) //trailing commas don't cause errors.  but they should
+FUNCTION VOID PrintHelloWorld(INT x) //trailing commas don't cause errors.  but they should
 
   io::print_ln("Hello World");
 
