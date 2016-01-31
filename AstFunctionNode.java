@@ -5,7 +5,10 @@ import java.io.IOException;
 
 public class AstFunctionNode extends AstNode{
   private String FunctionName;
- 
+  int numForLoop;
+  int numWhileLoop;
+  int numIfStatement;
+
   public AstFunctionNode(FileWriter filename){
     writer = filename;
     name = "\"Function Name Not Set\"";
@@ -31,4 +34,27 @@ public class AstFunctionNode extends AstNode{
     name += " )\"";
   }
 
+  public void addForLoop(){
+    numForLoop++;
+  }
+  
+  public void addWhileLoop(){
+    numWhileLoop++;
+  }
+  
+  public void addIfStatement(){
+    numIfStatement++;
+  }
+  
+  public int getNumForLoop(){
+    return numForLoop;
+  }
+  
+  public int getNumWhileLoop(){
+    return numWhileLoop;
+  }
+  
+  public int getNumIfStatement(){
+    return numIfStatement;
+  }
 }

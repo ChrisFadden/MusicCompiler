@@ -24,16 +24,16 @@ public class AstNode {
   public FileWriter writer; 
   public String name;
   
-  int begin;
-  int end;
+  public int begin;
+  public int  end;
 
   public AstNode(){}
-  public AstNode(FileWriter filename, int lineNumber){
+  public AstNode(FileWriter filename){
     writer = filename;
-    name = "\"Default(";
-    name += lineNumber;
-    name += ")\"";
+    name = "\"Default\"";
     children = new ArrayList<AstNode>(); 
+    begin = -1;
+    end = -1; 
   }//end constructor
 
   public void makeGraph() throws IOException { 
@@ -65,8 +65,39 @@ public class AstNode {
   public void setEnd(int e){
     end = e;
   }
+  
+  public int getBegin(){
+    return begin;
+  }
+  
+  public int getEnd(){
+    return end;
+  }
+
   public void haveAllInfo(){}
-}
+
+  public FileWriter getFileWriter(){
+    return writer;
+  }
+  
+  public void addForLoop(){}
+      
+  public void addWhileLoop(){}
+  
+  public void addIfStatement(){}
+  
+  public int getNumForLoop(){
+    return -1;
+  }
+  
+  public int getNumWhileLoop(){
+    return -1;
+  }
+  
+  public int getNumIfStatement(){
+    return -1;
+  }
+}//end AstNode class
 
 
 

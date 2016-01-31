@@ -10,7 +10,13 @@ FUNCTION GENERIC<T> TemplatesWork(GENERIC<W> arg1, GENERIC<U> arg2)//need to fix
 END FUNCTION
 
 PROGRAM Hello World
-    
+  
+  FOR i IN 1:3:5
+    FOR j IN 2:4:6 
+    x = i;
+    END FOR
+  END FOR
+  
   WHILE(i = 0; i < 4; i++)
     i++;
   END WHILE
