@@ -12,6 +12,23 @@ public class Music {
       tokens.add(Lexer.lex(input));
     }
     
+    //Test (This is how I should handle scoping)
+    ArrayList<AstNode> test = new ArrayList<AstNode>();
+    AstNode scope = new AstNode(); 
+    for(int i = 0; i < 5; i++){ 
+        AstNode added = new AstNode(); 
+        test.add(added);  
+    }
+    /*
+     * THIS IS VERY IMPORTANT
+     */
+    scope = test.get(1);
+    test.get(1).setBegin(4);
+    System.out.println(scope.getBegin());
+    /*
+     *  This is how I'll do the copy and scoping
+     */
+
     FileWriter writer = new FileWriter(filename.substring(0,filename.length() - 6) + ".dot");
     writer.write("digraph G{");
     writer.write("\r\n"); 
