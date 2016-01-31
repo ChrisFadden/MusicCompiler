@@ -18,13 +18,13 @@ with Windows and Linux.
 - [ ] Java Bytecode output
 
 ## Hello World
-'''
+```
 #remix io;
 
 PROGRAM Hello World
   io::println("Hello World");
 END PROGRAM Hello World
-'''
+```
 
 ## Other Languages
 If you are interested in the specific programming of my language,
