@@ -10,13 +10,8 @@ public class AstProgramNode extends AstNode{
     name = "\"Program Name Not Set\"";
     children = new ArrayList<AstNode>(); 
   }
-  public void setName(String newName, int lineNumber){
+  public void setName(String newName){
     ProgramName = newName;
-    name = "\"Program ";
-    name += ProgramName;
-    name += " (";
-    name += lineNumber;
-    name += ")\"";
   }
   
   public AST_Type getType(){
@@ -26,4 +21,15 @@ public class AstProgramNode extends AstNode{
   public FileWriter getFileWriter(){
     return writer;
   }
+
+  public void haveAllInfo(){
+    name = "\"Program ";
+    name += ProgramName;
+    name += " (";
+    name += begin;
+    name += ":";
+    name += end;
+    name += " )\"";
+  }
+
 }

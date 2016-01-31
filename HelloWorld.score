@@ -1,18 +1,20 @@
+
+
+FUNCTION VOID Hello(INT x, FLOAT y) //no error
+  x = x*y;
+  RETURN;
+END FUNCTION
+    
+FUNCTION GENERIC<T> TemplatesWork(GENERIC<W> arg1, GENERIC<U> arg2)//need to fix this
+  x = x*y;
+END FUNCTION
+
 PROGRAM Hello World
     
-    FUNCTION VOID Hello(INT x, FLOAT y) //no error
-      x = x*y;
-      RETURN;
-    END FUNCTION
-    
-    FUNCTION GENERIC<T> TemplatesWork(GENERIC<W> arg1, GENERIC<U> arg2)//need to fix this
-      x = x*y;
-    END FUNCTION
+  WHILE(i = 0; i < 4; i++)
+    i++;
+  END WHILE
 
-    WHILE(i = 0; i < 4; i++)
-      i++;
-    END WHILE
-
-    INT x = 4;
-    CHAR x = intersperse;
+  INT x = 4;
+  CHAR x = intersperse;
 END PROGRAM Hello World

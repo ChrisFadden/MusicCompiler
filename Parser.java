@@ -22,16 +22,20 @@ public class Parser {
     //Make Expression Node0 of program, and everything else starts from 
     //there.  eventually.
     ProgramName = "";
-    AstProgramNode program = new AstProgramNode(writer);
+ 
+    AstFileNode file = new AstFileNode(writer); 
+    file.setName(filename);
+    file.haveAllInfo();
+
     int numFuncs = 0;
     int i = 1;
     for(ArrayList<Lexer.Token> token : unchangedLexInput)
     { 
       if(token.size() > 0){ 
         if(token.get(0).type == Lexer.TokenType.FunctionTok){ 
-          ParseFunction(token,i,filename,program);   
+          ParseFunction(token,i,filename,file);   
           int funcCount = 0; 
-          for(AstNode node : program.children){
+          for(AstNode node : file.children){
             if(node.getType() == AstNode.AST_Type.Function){
               if(numFuncs == funcCount){
                 node.setBegin(i);
@@ -63,15 +67,27 @@ public class Parser {
           System.out.println(i);
           ParseCollectionName(token,i,filename);
         } else if(token.get(0).type == Lexer.TokenType.ProgramTok){ 
-          System.out.print("Program begins line: ");
-          System.out.println(i); 
-          ParseProgName(token,i,filename,program); 
+          AstProgramNode program = new AstProgramNode(writer);
+          program.setBegin(i);  
+          ParseProgName(token,i,filename,program);
+          file.addChild(program);
         } else if(token.get(0).type == Lexer.TokenType.EndifTok){
           System.out.print("If/elseif ends line: ");
           System.out.println(i);
-        } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){
-          System.out.print("Program ends line: ");
-          System.out.println(i); 
+        } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){ 
+          int programCount = 0; 
+          String err;
+          for(AstNode node : file.children){
+            if(node.getType() == AstNode.AST_Type.Program){
+              if(programCount > 0){
+                err = "You may only have a single Program";
+                ParseErrorReport(i,filename,err);
+              } 
+              node.setEnd(i);
+              node.haveAllInfo();
+              programCount++; 
+            }
+          }
         } else if(token.get(0).type == Lexer.TokenType.EndForTok){
           System.out.print("For Loop ends line: ");
           System.out.println(i);
@@ -80,7 +96,7 @@ public class Parser {
           System.out.println(i);
         } else if(token.get(0).type == Lexer.TokenType.EndFunctionTok){  
           int funcCount = 1;
-          for(AstNode node : program.children){
+          for(AstNode node : file.children){
             if(node.getType() == AstNode.AST_Type.Function){ 
               if(funcCount == numFuncs){
                 node.setEnd(i);
@@ -102,7 +118,7 @@ public class Parser {
       }//end token size check
       i++;
     }//end Lex loop
-    program.makeGraph();
+    file.makeGraph();
   }//end Parser constructor
   
   public void ParseErrorReport(int lineNum, String filename, String err){
@@ -132,11 +148,11 @@ public class Parser {
       }
     }//end token array loop 
 
-    program.setName(ProgramName,lineNum);
+    program.setName(ProgramName);
 
   }//end ParseProgName
   
-  public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstProgramNode program){
+  public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstFileNode file){
     //Make Strings something other than empty.  something like "never set" or similar... 
     String functionName = ""; 
     String returnType = ""; 
@@ -144,7 +160,7 @@ public class Parser {
     ArrayList<Pair<String,String>> functionArgs = new ArrayList<Pair<String,String>>();
     int lexNum = 2;
     ArrayList<Integer> mutableArgs = new ArrayList<Integer>();
-    AstFunctionNode func = new AstFunctionNode(program.getFileWriter()); 
+    AstFunctionNode func = new AstFunctionNode(file.getFileWriter()); 
     
     String err;
     
@@ -314,7 +330,7 @@ public class Parser {
       argNode.setName(arg.getB()); 
       func.addChild(argNode); 
     }
-    program.addChild(func);
+    file.addChild(func);
   }//end ParseFunction
   
   public void ParseForLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
