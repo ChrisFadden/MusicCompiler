@@ -5,6 +5,14 @@ PROGRAM Hello World
       RETURN;
     END FUNCTION
     
+   // FUNCTION GENERIC<T> TemplatesWork(GENERIC<W> arg1, GENERIC<X> arg2)//need to fix this
+   //   x = x*y;
+   // END FUNCTION
+
+//    FUNCTION GENERIC<T> TemplatesWork(DOUBLE arg1, INT arg2)
+ //     x = x*y;
+  //  END FUNCTION
+
     WHILE(i = 0; i < 4; i++)
       i++;
     END WHILE
