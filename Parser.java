@@ -17,36 +17,85 @@ public class Parser {
 
   public Parser(ArrayList<ArrayList<Lexer.Token>> tokens, String filename, FileWriter writer) throws IOException{     
     unchangedLexInput = tokens;
-    //lexInput = tokens;
-       
+    
+    //Access children of Program to give lengths to how long each block is.
+    //Make Expression Node0 of program, and everything else starts from 
+    //there.  eventually.
     ProgramName = "";
     AstProgramNode program = new AstProgramNode(writer);
+    int numFuncs = 0;
     int i = 1;
     for(ArrayList<Lexer.Token> token : unchangedLexInput)
     { 
       if(token.size() > 0){ 
-        if(token.get(0).type == Lexer.TokenType.FunctionTok){
-          ParseFunction(token,i,filename,program); 
+        if(token.get(0).type == Lexer.TokenType.FunctionTok){ 
+          ParseFunction(token,i,filename,program);   
+          int funcCount = 0; 
+          for(AstNode node : program.children){
+            if(node.getType() == AstNode.AST_Type.Function){
+              if(numFuncs == funcCount){
+                node.setBegin(i);
+              } 
+              funcCount++; 
+            }
+          }
+          numFuncs++;
         } else if(token.get(0).type == Lexer.TokenType.ForTok){
+          System.out.print("For Loop begins line: ");
+          System.out.println(i);
           ParseForLoop(token,i,filename); 
         } else if(token.get(0).type == Lexer.TokenType.WhileTok){
+          System.out.print("While Loop begins line: ");
+          System.out.println(i); 
           ParseWhileLoop(token,i,filename);
         } else if(token.get(0).type == Lexer.TokenType.HashTok){
           ParseCompileDirective(token,i,filename);       
         } else if(token.get(0).type == Lexer.TokenType.IfTok){
+          System.out.print("If Statement begins line: ");
+          System.out.println(i); 
           ParseIfStatement(token,i,filename);
         } else if(token.get(0).type == Lexer.TokenType.ElseifTok){
+          System.out.print("If ends, elseif begins line: ");
+          System.out.println(i); 
           ParseIfStatement(token,i,filename); 
         } else if(token.get(0).type == Lexer.TokenType.CollectionTok){
+          System.out.print("Collection begins line: ");
+          System.out.println(i);
           ParseCollectionName(token,i,filename);
         } else if(token.get(0).type == Lexer.TokenType.ProgramTok){ 
+          System.out.print("Program begins line: ");
+          System.out.println(i); 
           ParseProgName(token,i,filename,program); 
         } else if(token.get(0).type == Lexer.TokenType.EndifTok){
+          System.out.print("If/elseif ends line: ");
+          System.out.println(i);
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){
+          System.out.print("Program ends line: ");
+          System.out.println(i); 
         } else if(token.get(0).type == Lexer.TokenType.EndForTok){
+          System.out.print("For Loop ends line: ");
+          System.out.println(i);
         } else if(token.get(0).type == Lexer.TokenType.EndWhileTok){
+          System.out.print("While Loop ends line: ");
+          System.out.println(i);
+        } else if(token.get(0).type == Lexer.TokenType.EndFunctionTok){  
+          int funcCount = 1;
+          for(AstNode node : program.children){
+            if(node.getType() == AstNode.AST_Type.Function){ 
+              if(funcCount == numFuncs){
+                node.setEnd(i);
+                node.haveAllInfo();
+              }
+              funcCount++;
+            }  
+          } 
         } else if(token.get(0).data.equals("GENERIC")){ 
+          System.out.print("Generic Collection begins line: ");
+          System.out.println(i); 
           ParseGenericCollectionName(token,i,filename);
+        } else if(token.get(0).type == Lexer.TokenType.EndCollectionTok){
+          System.out.print("Collection ends line: ");
+          System.out.println(i);
         }else {
           ParseExpression(token,i,filename); 
         }
@@ -169,7 +218,7 @@ public class Parser {
       ParseErrorReport(lineNum,filename,err);    
     }
     
-    func.setName(functionName,lineNum);
+    func.setName(functionName);
     AstVariableNode returnNode = new AstVariableNode(lineNum);
     returnNode.setName("Returned Variable");
     returnNode.setType(returnType);
@@ -184,8 +233,8 @@ public class Parser {
     int k = 0;
     int i = lexNum+2;
     while(i < LexInput.size()-1)
-    {
-      if(LexInput.get(i).type == Lexer.TokenType.NameTok){
+    {  
+      if(LexInput.get(i).type == Lexer.TokenType.NameTok){ 
         if(k > 0){
           functionArgs.get(j).setB(LexInput.get(i).data);
         }else{
@@ -193,7 +242,7 @@ public class Parser {
         }
         k++;
       } else if(LexInput.get(i).type == Lexer.TokenType.TypeTok){
-          if(k == 0){ 
+          if(k == 0){  
             String arg1 = LexInput.get(i).data;
             if(LexInput.get(i).data.equals("GENERIC<")){  
               if(LexInput.size() < i+3){
@@ -206,7 +255,6 @@ public class Parser {
                 i++;
                 if(LexInput.get(i).data.equals(">")){
                   arg1 += LexInput.get(i).data; 
-                  i++;
                 } else{
                   err = "Invalid Generic declaration in arg: ";
                   err += j;
@@ -218,7 +266,6 @@ public class Parser {
                 i++;
                 if(LexInput.get(i).data.equals(">")){
                   arg1 += LexInput.get(i).data; 
-                  i++;
                 } else{
                   err = "Invalid Generic declaration in arg: ";
                   err += j;
@@ -233,7 +280,7 @@ public class Parser {
             err += j+1;
             err += " (you cannot pass in a type as a variable)";
             ParseErrorReport(lineNum,filename,err);
-          }
+          } 
         k++;
       } else if(LexInput.get(i).type == Lexer.TokenType.MutableTok){
         mutableArgs.add(j); 
@@ -242,7 +289,7 @@ public class Parser {
           functionArgs.get(j+1).setA("");
           functionArgs.get(j+1).setB(""); 
         
-          if(k != 2){ 
+          if(k != 2){  
             err = "Invalid function definition in argument ";
             err += j+1;
             err += " (mismatch between types and variables)";
@@ -265,7 +312,7 @@ public class Parser {
       AstVariableNode argNode = new AstVariableNode(lineNum);
       argNode.setType(arg.getA());
       argNode.setName(arg.getB()); 
-      func.addChild(argNode);
+      func.addChild(argNode); 
     }
     program.addChild(func);
   }//end ParseFunction

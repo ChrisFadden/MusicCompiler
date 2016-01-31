@@ -17,7 +17,7 @@ public class Lexer {
     
     //Class Tokens
     CollectionTok("(COLLECTION)"),
-    EndCollectionTok("(END COLLECTION)"),
+    EndCollectionTok("(END COLLECTION|END GENERIC COLLECTION)"),
 
     //Program tokens
     ProgramTok("(PROGRAM)"),

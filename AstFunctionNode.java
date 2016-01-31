@@ -4,22 +4,31 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class AstFunctionNode extends AstNode{
-  String FunctionName;
+  private String FunctionName;
+ 
   public AstFunctionNode(FileWriter filename){
     writer = filename;
     name = "\"Function Name Not Set\"";
+    begin = -1;
+    end = -1;
     children = new ArrayList<AstNode>(); 
   }
-  public void setName(String newName, int lineNumber){
-    FunctionName = newName;
-    name = "\"Function ";
-    name += FunctionName;
-    name += " (";
-    name += lineNumber;
-    name += ")\"";
+  public void setName(String newName){
+    FunctionName = newName; 
   }
   
   public AST_Type getType(){
     return AST_Type.Function;
   }
+  
+  public void haveAllInfo(){
+    name = "\"Function ";
+    name += FunctionName;
+    name += " (";
+    name += begin;
+    name += ":";
+    name += end;
+    name += " )\"";
+  }
+
 }

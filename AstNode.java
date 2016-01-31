@@ -24,6 +24,9 @@ public class AstNode {
   public FileWriter writer; 
   public String name;
   
+  int begin;
+  int end;
+
   public AstNode(){}
   public AstNode(FileWriter filename, int lineNumber){
     writer = filename;
@@ -54,6 +57,15 @@ public class AstNode {
   public String getName(){
     return name;
   } 
+
+  public void setBegin(int b){
+    begin = b;
+  }
+
+  public void setEnd(int e){
+    end = e;
+  }
+  public void haveAllInfo(){}
 }
 
 
