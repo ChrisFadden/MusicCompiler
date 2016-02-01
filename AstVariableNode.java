@@ -7,10 +7,20 @@ public class AstVariableNode extends AstNode{
   private String varName;
   private String varType;
   private int lineNum;
+  
+  public AstVariableNode(){
+    varName = "\"Variable Name Not Set\"";
+    varType = "\"Variable Type Not set\"";
+    lineNum = -1;
+    begin = -1;
+    end = -1;
+  }
   public AstVariableNode(int lineNumber){
     varName = "\"Variable Name Not Set\"";
     varType = "\"Variable Type Not set\"";
     lineNum = lineNumber;
+    begin = -1;
+    end = -1;
   }
   public void setName(String newName){varName = newName;}
   public void setType(String newType){varType = newType;}

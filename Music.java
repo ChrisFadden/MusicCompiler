@@ -24,7 +24,7 @@ public class Music {
      */
     scope = test.get(1);
     test.get(1).setBegin(4);
-    System.out.println(scope.getBegin());
+//    System.out.println(scope.getBegin());
     /*
      *  This is how I'll do the copy and scoping
      */

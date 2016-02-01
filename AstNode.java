@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class AstNode {
-  public static enum AST_Type{
+public static enum AST_Type{
     Program,
     File,
     Function,
@@ -27,7 +27,10 @@ public class AstNode {
   public int begin;
   public int  end;
 
-  public AstNode(){}
+  public AstNode(){
+    begin = -1;
+    end = -1;
+  }
   public AstNode(FileWriter filename){
     writer = filename;
     name = "\"Default\"";
@@ -78,24 +81,6 @@ public class AstNode {
 
   public FileWriter getFileWriter(){
     return writer;
-  }
-  
-  public void addForLoop(){}
-      
-  public void addWhileLoop(){}
-  
-  public void addIfStatement(){}
-  
-  public int getNumForLoop(){
-    return -1;
-  }
-  
-  public int getNumWhileLoop(){
-    return -1;
-  }
-  
-  public int getNumIfStatement(){
-    return -1;
   }
 }//end AstNode class
 

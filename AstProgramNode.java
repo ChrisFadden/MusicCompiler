@@ -39,29 +39,4 @@ public class AstProgramNode extends AstNode{
     name += end;
     name += " )\"";
   }
-  
-  public void addForLoop(){
-    numForLoop++;
-  }
-  
-  public void addWhileLoop(){
-    numWhileLoop++;
-  }
-  
-  public void addIfStatement(){
-    numIfStatement++;
-  }
-  
-  public int getNumForLoop(){
-    return numForLoop;
-  }
-  
-  public int getNumWhileLoop(){
-    return numWhileLoop;
-  }
-  
-  public int getNumIfStatement(){
-    return numIfStatement;
-  }
-
 }

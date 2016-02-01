@@ -27,49 +27,30 @@ public class Parser {
     file.setName(filename);
     file.haveAllInfo();
 
-    int numFuncs = 0;
     int i = 1;
     for(ArrayList<Lexer.Token> token : unchangedLexInput)
     { 
       if(token.size() > 0){ 
         if(token.get(0).type == Lexer.TokenType.FunctionTok){ 
-          ParseFunction(token,i,filename,file);   
-          int funcCount = 0; 
-          for(AstNode node : file.children){
-            if(node.getType() == AstNode.AST_Type.Function){
-              if(numFuncs == funcCount){
-                node.setBegin(i);
-              } 
-              funcCount++; 
-            }
-          }
-          numFuncs++;
-        } else if(token.get(0).type == Lexer.TokenType.ForTok){  
-          //Will have to make the scope check recursive.  I think 
-          int scopeCount = 0;
-          int childCount = 0;
-          for(AstNode node : file.children){
-            if(node.getBegin() != -1){ 
-              if(node.getEnd() == -1){ 
-                if(node.getBegin() > file.children.get(scopeCount).getBegin()){
-                  scopeCount = childCount; 
-                }
-              }
-            }
-            childCount++;
+          String err; 
+          AstNode scope = GetScope(file); 
+          if((scope.getType() != AstNode.AST_Type.File)
+             && (scope.getType() != AstNode.AST_Type.Collection)){
+            err = "You cannot have a function outside a file or collection\n";
+            err += "You currently have a function in a ";
+            err += scope.getType();
+            ParseErrorReport(i,filename,err);
+          } else{
+            ParseFunction(token,i,filename,scope);
           } 
-          
-          ParseForLoop(token,i,filename,file.children.get(scopeCount));
-          int forCount = 0;
-          for(AstNode node : file.children.get(scopeCount).children){
+        } else if(token.get(0).type == Lexer.TokenType.ForTok){  
+          AstNode scope = GetScope(file);  
+          ParseForLoop(token,i,filename,scope);
+          for(AstNode node : scope.children){
             if(node.getType() == AstNode.AST_Type.ForLoop){
-              if(file.children.get(scopeCount).getNumForLoop() == forCount){
                 node.setBegin(i);
-              }
-              forCount++;
             }
-          }
-          file.children.get(scopeCount).addForLoop();
+          } 
         } else if(token.get(0).type == Lexer.TokenType.WhileTok){
           System.out.print("While Loop begins line: ");
           System.out.println(i); 
@@ -97,56 +78,44 @@ public class Parser {
           System.out.print("If/elseif ends line: ");
           System.out.println(i);
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){ 
-          int programCount = 0; 
+          AstNode scope = GetScope(file); 
           String err;
-          for(AstNode node : file.children){
-            if(node.getType() == AstNode.AST_Type.Program){
-              if(programCount > 0){
-                err = "You may only have a single Program";
-                ParseErrorReport(i,filename,err);
-              } 
-              node.setEnd(i);
-              node.haveAllInfo();
-              programCount++; 
-            }
-          }
+          if(scope.getType() == AstNode.AST_Type.Program){
+            scope.setEnd(i);
+            scope.haveAllInfo();
+          } else {
+            err = "Expected to end ";
+            err += scope.getType();
+            err += "before ending the program";
+            ParseErrorReport(i,filename,err);
+          }  
         } else if(token.get(0).type == Lexer.TokenType.EndForTok){
-          int scopeCount = 0;
-          int childCount = 0;
-          for(AstNode node : file.children){
-            if(node.getBegin() != -1){ 
-              if(node.getEnd() == -1){ 
-                if(node.getBegin() > file.children.get(scopeCount).getBegin()){
-                  scopeCount = childCount; 
-                }
-              }
-            }
-            childCount++;
-          }     
-          int ForCount = 1; 
-          for(AstNode node : file.children.get(scopeCount).children){
-            if(node.getType() == AstNode.AST_Type.ForLoop){
-              if(ForCount == file.children.get(scopeCount).getNumForLoop()){
-                node.setEnd(i);
-                node.haveAllInfo();
-              }
-              ForCount++;
-            }
+          AstNode scope = GetScope(file);  
+          String err;
+          if(scope.getType() == AstNode.AST_Type.ForLoop){
+            scope.setEnd(i);
+            scope.haveAllInfo();
+          } else{
+            err = "Expected to end ";
+            err += scope.getType();
+            err += "before ending the for loop";
+            ParseErrorReport(i,filename,err);
           }
         } else if(token.get(0).type == Lexer.TokenType.EndWhileTok){
           System.out.print("While Loop ends line: ");
           System.out.println(i);
         } else if(token.get(0).type == Lexer.TokenType.EndFunctionTok){  
-          int funcCount = 1;
-          for(AstNode node : file.children){
-            if(node.getType() == AstNode.AST_Type.Function){ 
-              if(funcCount == numFuncs){
-                node.setEnd(i);
-                node.haveAllInfo();
-              }
-              funcCount++;
-            }  
-          } 
+          AstNode scope = GetScope(file);
+          String err; 
+          if(scope.getType() == AstNode.AST_Type.Function){
+            scope.setEnd(i);
+            scope.haveAllInfo();
+          } else{
+            err = "Expected to end ";
+            err += scope.getType();
+            err += "before ending the function";
+            ParseErrorReport(i,filename,err);
+          }
         } else if(token.get(0).data.equals("GENERIC")){ 
           System.out.print("Generic Collection begins line: ");
           System.out.println(i); 
@@ -194,7 +163,7 @@ public class Parser {
 
   }//end ParseProgName
   
-  public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstFileNode file){
+  public void ParseFunction(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstNode file){
     //Make Strings something other than empty.  something like "never set" or similar... 
     String functionName = ""; 
     String returnType = ""; 
@@ -372,6 +341,7 @@ public class Parser {
       argNode.setName(arg.getB()); 
       func.addChild(argNode); 
     }
+    func.setBegin(lineNum);
     file.addChild(func);
   }//end ParseFunction
   
@@ -795,6 +765,23 @@ public class Parser {
     
     return;
   }//end Parse Collection
+
+  public AstNode GetScope(AstNode currentNode){
+     
+    AstNode scope = new AstNode();
+    scope = currentNode; 
+   
+    for(AstNode node : currentNode.children){ 
+      if(node.getBegin() != -1){
+        if(node.getEnd() == -1){ 
+          scope = GetScope(node); 
+        }  
+      }
+    }
+
+    return scope;  
+  }//end GetScope
+
 }//end class
 
 
