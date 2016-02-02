@@ -5,18 +5,13 @@ import java.io.IOException;
 
 public class AstProgramNode extends AstNode{
   String ProgramName;
-  int numForLoop;
-  int numWhileLoop;
-  int numIfStatement;
+
   public AstProgramNode(FileWriter filename){
     writer = filename;
     name = "\"Program Name Not Set\"";
     children = new ArrayList<AstNode>(); 
     begin = -1;
-    end = -1;
-    numForLoop = 0;
-    numWhileLoop = 0;
-    numIfStatement = 0;
+    end = -1; 
   }
   public void setName(String newName){
     ProgramName = newName;

@@ -52,19 +52,55 @@ public class Parser {
             }
           } 
         } else if(token.get(0).type == Lexer.TokenType.WhileTok){
-          System.out.print("While Loop begins line: ");
-          System.out.println(i); 
-          ParseWhileLoop(token,i,filename);
+          AstNode scope = GetScope(file); 
+          ParseWhileLoop(token,i,filename,scope);
+          for(AstNode node : scope.children){
+            if(node.getType() == AstNode.AST_Type.WhileLoop){ 
+                node.setBegin(i);
+            }
+          }
         } else if(token.get(0).type == Lexer.TokenType.HashTok){
           ParseCompileDirective(token,i,filename);       
         } else if(token.get(0).type == Lexer.TokenType.IfTok){
-          System.out.print("If Statement begins line: ");
-          System.out.println(i); 
-          ParseIfStatement(token,i,filename);
+          AstNode scope = GetScope(file);
+          ParseIfStatement(token,i,filename,scope);
+          for(AstNode node : scope.children){
+            if(node.getType() == AstNode.AST_Type.If){
+              node.setBegin(i);
+            }
+          }
         } else if(token.get(0).type == Lexer.TokenType.ElseifTok){
-          System.out.print("If ends, elseif begins line: ");
-          System.out.println(i); 
-          ParseIfStatement(token,i,filename); 
+          AstNode scope = GetScope(file);
+          String err; 
+          if(scope.getType() != AstNode.AST_Type.If){
+            err = "Expeced to end ";
+            err += scope.getType();
+            err += " before ELSEIF statement";
+            ParseErrorReport(i,filename,err);
+          }
+          AstElseNode elseifNodeElse = new AstElseNode(scope.getFileWriter());
+          elseifNodeElse.setLine(i);
+          elseifNodeElse.haveAllInfo();
+          ParseIfStatement(token,i,filename,elseifNodeElse); 
+          for(AstNode node : elseifNodeElse.children){
+            if(node.getType() == AstNode.AST_Type.If){
+              node.setBegin(i);
+            }
+          }
+          scope.addChild(elseifNodeElse); 
+        } else if(token.get(0).type == Lexer.TokenType.ElseTok){
+          AstNode scope = GetScope(file);
+          String err;
+          if(scope.getType() != AstNode.AST_Type.If){
+            err = "Expeced to end ";
+            err += scope.getType();
+            err += " before ELSE";
+            ParseErrorReport(i,filename,err);
+          }
+          AstElseNode elseNode = new AstElseNode(scope.getFileWriter());
+          elseNode.setLine(i); 
+          elseNode.haveAllInfo();
+          scope.addChild(elseNode); 
         } else if(token.get(0).type == Lexer.TokenType.CollectionTok){
           System.out.print("Collection begins line: ");
           System.out.println(i);
@@ -75,8 +111,18 @@ public class Parser {
           ParseProgName(token,i,filename,program);
           file.addChild(program);
         } else if(token.get(0).type == Lexer.TokenType.EndifTok){
-          System.out.print("If/elseif ends line: ");
-          System.out.println(i);
+          AstNode scope = GetScope(file); 
+          String err;
+          if((scope.getType() == AstNode.AST_Type.If)
+             || (scope.getType() == AstNode.AST_Type.Else)){
+            scope.setEnd(i);
+            scope.haveAllInfo();
+          } else {
+            err = "Expected to end ";
+            err += scope.getType();
+            err += " before END IF";
+            ParseErrorReport(i,filename,err);
+          }
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){ 
           AstNode scope = GetScope(file); 
           String err;
@@ -86,7 +132,7 @@ public class Parser {
           } else {
             err = "Expected to end ";
             err += scope.getType();
-            err += "before ending the program";
+            err += " before ending the program";
             ParseErrorReport(i,filename,err);
           }  
         } else if(token.get(0).type == Lexer.TokenType.EndForTok){
@@ -98,12 +144,21 @@ public class Parser {
           } else{
             err = "Expected to end ";
             err += scope.getType();
-            err += "before ending the for loop";
+            err += " before ending the for loop";
             ParseErrorReport(i,filename,err);
           }
         } else if(token.get(0).type == Lexer.TokenType.EndWhileTok){
-          System.out.print("While Loop ends line: ");
-          System.out.println(i);
+          AstNode scope = GetScope(file);  
+          String err;
+          if(scope.getType() == AstNode.AST_Type.WhileLoop){
+            scope.setEnd(i);
+            scope.haveAllInfo();
+          } else{
+            err = "Expected to end ";
+            err += scope.getType();
+            err += " before ending the while loop";
+            ParseErrorReport(i,filename,err);
+          }
         } else if(token.get(0).type == Lexer.TokenType.EndFunctionTok){  
           AstNode scope = GetScope(file);
           String err; 
@@ -113,7 +168,7 @@ public class Parser {
           } else{
             err = "Expected to end ";
             err += scope.getType();
-            err += "before ending the function";
+            err += " before ending the function";
             ParseErrorReport(i,filename,err);
           }
         } else if(token.get(0).data.equals("GENERIC")){ 
@@ -370,17 +425,28 @@ public class Parser {
       //Copy the LexInput into Collection, minus the first 3 tokens
       Collection.add(LexInput.get(i)); 
     } 
-    //Parse Collection with the expression parser.
+    //Parse Loop Collection with the expression parser.
     AstForNode forNode = new AstForNode(file.getFileWriter()); 
     AstVariableNode iterNode = new AstVariableNode(lineNum);
     forNode.setBegin(lineNum); 
     iterNode.setName(iter);
     iterNode.setType("ITERATOR"); 
     forNode.addChild(iterNode);
+        
+    AstVariableNode loopCollectionNode = new AstVariableNode(lineNum);
+    String CollectionName = "";
+    for(Lexer.Token c : Collection){
+      CollectionName += c.data;
+    }
+    
+    loopCollectionNode.setName(CollectionName);
+    loopCollectionNode.setType("LOOP COLLECTION");
+    forNode.addChild(loopCollectionNode);
+    
     file.addChild(forNode); 
   }//end Parse For loop
 
-  public void ParseWhileLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){ 
+  public void ParseWhileLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstNode file){ 
     /* These conditions will be passed to the expression parser
      * which can then better describe what exactly the while loop
      * is doing */
@@ -415,6 +481,39 @@ public class Parser {
         return; 
       }  
     }//end LexInput loop
+  
+    //Parse Loop Conditions with the expression parser.
+    AstWhileNode whileNode = new AstWhileNode(file.getFileWriter()); 
+    AstVariableNode initNode = new AstVariableNode(lineNum);
+    AstVariableNode termNode = new AstVariableNode(lineNum);
+    AstVariableNode iterNode = new AstVariableNode(lineNum);
+    whileNode.setBegin(lineNum); 
+    
+    initNode.setType("INITIAL CONDITION: ");
+    termNode.setType("TERMINATING CONDITION: ");
+    iterNode.setType("ITERATING EXPRESSION: ");
+    
+    String initName = "";
+    String termName = "";
+    String iterName = "";
+
+    for(Lexer.Token c : InitCondition)
+      initName += c.data;
+    for(Lexer.Token c : TermCondition)
+      termName += c.data;
+    for(Lexer.Token c : IterCondition)
+      iterName += c.data;
+
+    initNode.setName(initName);
+    termNode.setName(termName);
+    iterNode.setName(iterName);
+
+    whileNode.addChild(initNode);
+    whileNode.addChild(termNode);
+    whileNode.addChild(iterNode);
+    
+    file.addChild(whileNode);
+
   }//end Parse While Loop
 
   public void ParseCompileDirective(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){ 
@@ -440,7 +539,7 @@ public class Parser {
       }//end rehearse lex input
     }
   }//end Parse CompileDirective
-  public void ParseIfStatement(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
+  public void ParseIfStatement(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstNode file){
     String err;
     ArrayList<Lexer.Token> ifExpression = new ArrayList<Lexer.Token>(LexInput.size() - 3);
     if(LexInput.get(1).type != Lexer.TokenType.OpenParenTok){
@@ -455,7 +554,18 @@ public class Parser {
     for(int i = 2; i < LexInput.size()-1; i++){
       ifExpression.add(LexInput.get(i));
     }
+    AstIfNode ifNode = new AstIfNode(file.getFileWriter());
+    AstVariableNode ifExpressionNode = new AstVariableNode(lineNum);
+    ifNode.setBegin(lineNum);
 
+    ifExpressionNode.setType("IF CONDITION: ");
+    String ifConditionName = "";
+    for(Lexer.Token c : ifExpression)
+      ifConditionName += c.data;
+    ifExpressionNode.setName(ifConditionName);   
+    
+    ifNode.addChild(ifExpressionNode);
+    file.addChild(ifNode); 
   }//end Parse If Statement
   
   public void ParseCollectionName(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){

@@ -1,26 +1,17 @@
-
-
-FUNCTION VOID Hello(INT x, FLOAT y) //no error
-  x = x*y;
-  RETURN;
-END FUNCTION
-    
-FUNCTION GENERIC<T> TemplatesWork(GENERIC<W> arg1, GENERIC<U> arg2)//need to fix this
-  x = x*y;
-END FUNCTION
-
 PROGRAM Hello World
-  
-  FOR i IN 1:3:5
-    FOR j IN 2:4:6 
-    x = i;
-    END FOR
-  END FOR
-  
-  WHILE(i = 0; i < 4; i++)
-    i++;
-  END WHILE
+   IF(x == 4)
+    IF(y == 2)
 
-  INT x = 4;
-  CHAR x = intersperse;
+    ELSEIF(y == 3)
+      y*y;
+    ELSE
+      y*y;
+    END IF
+    x*x;
+  ELSEIF(x == 5)
+    x*y;
+  ELSE
+    x*y; 
+  END IF
+
 END PROGRAM Hello World

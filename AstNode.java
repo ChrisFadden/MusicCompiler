@@ -11,6 +11,7 @@ public static enum AST_Type{
     ForLoop,
     WhileLoop,
     If,
+    Else,
     Collection,
     BooleanExpression,
     ArithmeticExpression,

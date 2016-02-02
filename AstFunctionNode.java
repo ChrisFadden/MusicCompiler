@@ -5,10 +5,6 @@ import java.io.IOException;
 
 public class AstFunctionNode extends AstNode{
   private String FunctionName;
-  int numForLoop;
-  int numWhileLoop;
-  int numIfStatement;
-
   public AstFunctionNode(FileWriter filename){
     writer = filename;
     name = "\"Function Name Not Set\"";
