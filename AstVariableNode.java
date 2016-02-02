@@ -34,9 +34,6 @@ public class AstVariableNode extends AstNode{
     name += ")\"";
     return name;
   }
-  
-  public void makeGraph(){}
-
   public AST_Type getType(){
     return AST_Type.Variable;
   }

@@ -41,8 +41,9 @@ public static enum AST_Type{
     end = -1; 
   }//end constructor
 
-  public void makeGraph() throws IOException { 
-    for(AstNode node : children){
+  final public void makeGraph() throws IOException {  
+     
+    for(AstNode node : children){  
       writer.write(name);
       writer.write(" -> ");
       writer.write(node.getName());

@@ -62,67 +62,45 @@ public class Parser {
         } else if(token.get(0).type == Lexer.TokenType.HashTok){
           ParseCompileDirective(token,i,filename);       
         } else if(token.get(0).type == Lexer.TokenType.IfTok){
-          AstNode scope = GetScope(file); 
-          ParseIfStatement(token,i,filename,scope); 
+          AstNode scope = GetScope(file);  
+          ParseIfStatement(token,i,filename,scope);   
         } else if(token.get(0).type == Lexer.TokenType.ElseifTok){ 
-          AstNode scopeExpr = GetScope(file);
-          String err;
-          if(scopeExpr.getType() != AstNode.AST_Type.Block){
-            err = "Expected Block scope\n";
-            err += "Current scope is ";
-            err += scopeExpr.getType();
-            err += "\nThe name is ";
-            err += scopeExpr.getBegin(); 
-            ParseErrorReport(i,filename,err);
-          } else {
-            scopeExpr.setEnd(i);
-          }
-           
+          //End Block Scope
           AstNode scope = GetScope(file);
+          scope.setEnd(i);
           
-          if(scope.getType() != AstNode.AST_Type.If){
-            err = "Expected to end ";
-            err += scope.getType();
-            err += " before ELSE";
-            ParseErrorReport(i,filename,err);
-          }
-          AstElseNode elseNode = new AstElseNode(scope.getFileWriter());
-          elseNode.setLine(i); 
+          //Should be IF scope
+          scope = GetScope(file);
+          AstElseNode elseNode = new AstElseNode(file.getFileWriter());
+          elseNode.setLine(i);
           elseNode.haveAllInfo();
-          scope.addChild(elseNode);
-          scope = GetScope(file);  
-          ParseIfStatement(token,i,filename,scope);  
-        } else if(token.get(0).type == Lexer.TokenType.ElseTok){ 
-            
-          AstNode scopeExpr = GetScope(file);
-          String err;
-          if(scopeExpr.getType() != AstNode.AST_Type.Block){
-            err = "Expected Block scope\n";
-            err += "Current scope is ";
-            err += scopeExpr.getType();
-            err += "\nThe name is ";
-            err += scopeExpr.getBegin(); 
-            ParseErrorReport(i,filename,err);
-          } else {
-            scopeExpr.setEnd(i);
-          }
-           
-          AstNode scope = GetScope(file);
           
-          if(scope.getType() != AstNode.AST_Type.If){
-            err = "Expected to end ";
-            err += scope.getType();
-            err += " line: ";
-            err += scope.getBegin();
-            err += " before ELSE";
-            ParseErrorReport(i,filename,err);
-          }
-          AstElseNode elseNode = new AstElseNode(scope.getFileWriter());
-          elseNode.setLine(i); 
-          elseNode.haveAllInfo();
-          AstBlockNode elseBlock = new AstBlockNode(i);
-          elseNode.addChild(elseBlock);
+          //Add Block to ELSE
+          AstBlockNode blockNode = new AstBlockNode(file.getFileWriter(),i);
+          blockNode.haveAllInfo(); 
+          ParseIfStatement(token,i,filename,blockNode);  
+          elseNode.addChild(blockNode);
+
+          //Put Else as IF child
           scope.addChild(elseNode);  
+        } else if(token.get(0).type == Lexer.TokenType.ElseTok){ 
+          //End Block Scope 
+          AstNode scope = GetScope(file);
+          scope.setEnd(i);
+
+          //Should be IF scope
+          scope = GetScope(file);
+          AstElseNode elseNode = new AstElseNode(file.getFileWriter());
+          elseNode.setLine(i);
+          elseNode.haveAllInfo();
+        
+          //Add Block to ELSE
+          AstBlockNode blockNode = new AstBlockNode(file.getFileWriter(),i);
+          blockNode.haveAllInfo();
+          elseNode.addChild(blockNode);
+
+          //Put Else as IF child
+          scope.addChild(elseNode);
           
         } else if(token.get(0).type == Lexer.TokenType.CollectionTok){
           System.out.print("Collection begins line: ");
@@ -139,10 +117,35 @@ public class Parser {
           if(scope.getType() == AstNode.AST_Type.Block){
             //Will have to close at least two layers
             scope.setEnd(i);
-            scope.haveAllInfo(); 
+            scope.haveAllInfo();
             scope = GetScope(file);
+            
+            while(!(scope.getType() == AstNode.AST_Type.If)){
+              scope.setEnd(i);
+              scope.haveAllInfo();
+              scope = GetScope(file);  
+            }
             scope.setEnd(i);
             scope.haveAllInfo();
+            if(scope.getType() != AstNode.AST_Type.If){ 
+              scope = GetScope(file);
+              //Not sure if kosher 
+              if(scope.getType() == AstNode.AST_Type.Block){
+                //Will have to close at least two layers
+                scope.setEnd(i);
+                scope.haveAllInfo();
+                scope = GetScope(file);
+                while(!(scope.getType() == AstNode.AST_Type.If)){
+                  scope.setEnd(i);
+                  scope.haveAllInfo();
+                  scope = GetScope(file); 
+                  System.out.println("I'm infinite looping"); 
+                }
+                scope.setEnd(i);
+                scope.haveAllInfo();
+              }
+            }
+           
           } else {
             err = "Expected to end ";
             err += scope.getType();
@@ -151,8 +154,6 @@ public class Parser {
             err += " before END IF";
             ParseErrorReport(i,filename,err);
           }
-          
-
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){ 
           AstNode scope = GetScope(file); 
           String err;
@@ -595,7 +596,7 @@ public class Parser {
       ifConditionName += c.data;
     ifExpressionNode.setName(ifConditionName);    
     ifNode.addChild(ifExpressionNode);
-    AstBlockNode ifBlock = new AstBlockNode(lineNum+0.1);
+    AstBlockNode ifBlock = new AstBlockNode(file.getFileWriter(),lineNum+0.1);
     ifNode.addChild(ifBlock);
     file.addChild(ifNode); 
   }//end Parse If Statement

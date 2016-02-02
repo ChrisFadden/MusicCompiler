@@ -10,7 +10,8 @@ public class AstBlockNode extends AstNode{
     end = -1;
     children = new ArrayList<AstNode>();  
   }
-  public AstBlockNode(double lineNumber){
+  public AstBlockNode(FileWriter filename, double lineNumber){
+    writer = filename; 
     begin = lineNumber;
     end = -1;
     children = new ArrayList<AstNode>();
@@ -26,8 +27,6 @@ public class AstBlockNode extends AstNode{
     return name;
   }
   
-  public void makeGraph(){}
-
   public AST_Type getType(){
     return AST_Type.Block;
   }

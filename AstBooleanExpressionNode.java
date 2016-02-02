@@ -29,8 +29,6 @@ public class AstBooleanExpressionNode extends AstNode{
     return name;
   }
   
-  public void makeGraph(){}
-
   public AST_Type getType(){
     return AST_Type.BooleanExpression;
   }
