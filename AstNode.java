@@ -12,6 +12,7 @@ public static enum AST_Type{
     WhileLoop,
     If,
     Else,
+    Block,
     Collection,
     BooleanExpression,
     ArithmeticExpression,
@@ -25,8 +26,8 @@ public static enum AST_Type{
   public FileWriter writer; 
   public String name;
   
-  public int begin;
-  public int  end;
+  public double begin;
+  public double  end;
 
   public AstNode(){
     begin = -1;
@@ -70,11 +71,11 @@ public static enum AST_Type{
     end = e;
   }
   
-  public int getBegin(){
+  public double getBegin(){
     return begin;
   }
   
-  public int getEnd(){
+  public double getEnd(){
     return end;
   }
 
