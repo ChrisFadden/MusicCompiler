@@ -98,7 +98,7 @@ public class Parser {
           AstBlockNode blockNode = new AstBlockNode(file.getFileWriter(),i);
           blockNode.haveAllInfo();
           elseNode.addChild(blockNode);
-
+          
           //Put Else as IF child
           scope.addChild(elseNode);
           
@@ -115,45 +115,30 @@ public class Parser {
           AstNode scope = GetScope(file); 
           String err;
           if(scope.getType() == AstNode.AST_Type.Block){
-            //Will have to close at least two layers
+            //Close Block
             scope.setEnd(i);
             scope.haveAllInfo();
             scope = GetScope(file);
-            
+          
+            //Close everything up to first IF
             while(!(scope.getType() == AstNode.AST_Type.If)){
+      
               scope.setEnd(i);
               scope.haveAllInfo();
               scope = GetScope(file);  
             }
+            //end first IF
             scope.setEnd(i);
-            scope.haveAllInfo();
-            if(scope.getType() != AstNode.AST_Type.If){ 
-              scope = GetScope(file);
-              //Not sure if kosher 
-              if(scope.getType() == AstNode.AST_Type.Block){
-                //Will have to close at least two layers
-                scope.setEnd(i);
-                scope.haveAllInfo();
-                scope = GetScope(file);
-                while(!(scope.getType() == AstNode.AST_Type.If)){
-                  scope.setEnd(i);
-                  scope.haveAllInfo();
-                  scope = GetScope(file); 
-                  System.out.println("I'm infinite looping"); 
-                }
-                scope.setEnd(i);
-                scope.haveAllInfo();
-              }
+            scope.haveAllInfo();            
+                 
+            } else {
+              err = "Expected to end ";
+              err += scope.getType();
+              err += " line: ";
+              err += scope.getBegin();
+              err += " before END IF";
+              ParseErrorReport(i,filename,err);
             }
-           
-          } else {
-            err = "Expected to end ";
-            err += scope.getType();
-            err += " line: ";
-            err += scope.getBegin();
-            err += " before END IF";
-            ParseErrorReport(i,filename,err);
-          }
         } else if(token.get(0).type == Lexer.TokenType.EndProgramTok){ 
           AstNode scope = GetScope(file); 
           String err;
