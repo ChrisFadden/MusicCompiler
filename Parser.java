@@ -65,6 +65,7 @@ public class Parser {
           AstNode scope = GetScope(file);  
           ParseIfStatement(token,i,filename,scope);   
         } else if(token.get(0).type == Lexer.TokenType.ElseifTok){ 
+           
           //End Block Scope
           AstNode scope = GetScope(file);
           scope.setEnd(i);
@@ -74,7 +75,8 @@ public class Parser {
           AstElseNode elseNode = new AstElseNode(file.getFileWriter());
           elseNode.setLine(i);
           elseNode.haveAllInfo();
-          
+          ParseIfStatement(token,i,filename,scope); 
+          /*
           //Add Block to ELSE
           AstBlockNode blockNode = new AstBlockNode(file.getFileWriter(),i);
           blockNode.haveAllInfo(); 
@@ -83,6 +85,7 @@ public class Parser {
 
           //Put Else as IF child
           scope.addChild(elseNode);  
+          */ 
         } else if(token.get(0).type == Lexer.TokenType.ElseTok){ 
           //End Block Scope 
           AstNode scope = GetScope(file);
@@ -113,25 +116,33 @@ public class Parser {
           file.addChild(program);
         } else if(token.get(0).type == Lexer.TokenType.EndifTok){
           AstNode scope = GetScope(file); 
-          String err;
+          String err; 
           if(scope.getType() == AstNode.AST_Type.Block){
             //Close Block
             scope.setEnd(i);
             scope.haveAllInfo();
             scope = GetScope(file);
           
-            //Close everything up to first IF
+            //Close everything up to IF
             while(!(scope.getType() == AstNode.AST_Type.If)){
       
               scope.setEnd(i);
               scope.haveAllInfo();
               scope = GetScope(file);  
             }
-            //end first IF
+             
+            //end IF
             scope.setEnd(i);
             scope.haveAllInfo();            
-                 
-            } else {
+            
+            //Check if this is an ELSEIF
+            scope = GetScope(file);
+            if(scope.getType() == AstNode.AST_Type.If){
+              scope.setEnd(i);
+              scope.haveAllInfo();
+            }
+
+          } else {
               err = "Expected to end ";
               err += scope.getType();
               err += " line: ";
