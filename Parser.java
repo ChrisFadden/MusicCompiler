@@ -76,16 +76,7 @@ public class Parser {
           elseNode.setLine(i);
           elseNode.haveAllInfo();
           ParseIfStatement(token,i,filename,scope); 
-          /*
-          //Add Block to ELSE
-          AstBlockNode blockNode = new AstBlockNode(file.getFileWriter(),i);
-          blockNode.haveAllInfo(); 
-          ParseIfStatement(token,i,filename,blockNode);  
-          elseNode.addChild(blockNode);
-
-          //Put Else as IF child
-          scope.addChild(elseNode);  
-          */ 
+        
         } else if(token.get(0).type == Lexer.TokenType.ElseTok){ 
           //End Block Scope 
           AstNode scope = GetScope(file);
@@ -472,7 +463,7 @@ public class Parser {
     loopCollectionNode.setType("LOOP COLLECTION");
     forNode.addChild(loopCollectionNode);
     
-    file.addChild(forNode); 
+    file.addChild(forNode);  
   }//end Parse For loop
 
   public void ParseWhileLoop(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstNode file){ 
@@ -495,9 +486,16 @@ public class Parser {
     }
 
     for(int i = 2; i < LexInput.size() - 3; i++){
+ 
       if(LexInput.get(i+j).type == Lexer.TokenType.SemicolonTok){ 
         j++;
       }
+      
+      //Check if two semicolons were next to each other
+      if(LexInput.get(i+j).type == Lexer.TokenType.SemicolonTok){ 
+        j++;
+      }
+
       if(j == 0)
         InitCondition.add(LexInput.get(i));
       if(j == 1)

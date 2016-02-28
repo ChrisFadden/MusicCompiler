@@ -1,17 +1,4 @@
 PROGRAM Hello World
-   IF(x == 4)
-    IF(y == 2)
-      y*y; 
-//    ELSEIF(y == 3)
-      y*y;
-    ELSE
-      y*y;
-    END IF
-    x*x;
-//  ELSEIF(x == 5)
-    x*y;
-  ELSE
-    x*y; 
-  END IF
-
+  WHILE(;;i++)
+  END WHILE
 END PROGRAM Hello World

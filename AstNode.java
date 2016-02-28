@@ -31,7 +31,7 @@ public static enum AST_Type{
 
   public AstNode(){
     begin = -1;
-    end = -1;
+    end = -1; 
   }
   public AstNode(FileWriter filename){
     writer = filename;
@@ -42,14 +42,15 @@ public static enum AST_Type{
   }//end constructor
 
   final public void makeGraph() throws IOException {  
-     
+    
     for(AstNode node : children){  
       writer.write(name);
       writer.write(" -> ");
       writer.write(node.getName());
-      writer.write("\r\n");
-      node.makeGraph(); 
-    } 
+      writer.write("\r\n"); 
+      node.makeGraph();  
+    }
+    
   }
   
   public AST_Type getType(){

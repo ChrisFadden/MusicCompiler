@@ -14,6 +14,7 @@ public class AstVariableNode extends AstNode{
     lineNum = -1;
     begin = -1;
     end = -1;
+    children = new ArrayList<AstNode>(); 
   }
   public AstVariableNode(int lineNumber){
     varName = "\"Variable Name Not Set\"";
@@ -21,6 +22,7 @@ public class AstVariableNode extends AstNode{
     lineNum = lineNumber;
     begin = -1;
     end = -1;
+    children = new ArrayList<AstNode>();
   }
   public void setName(String newName){varName = newName;}
   public void setType(String newType){varType = newType;}
