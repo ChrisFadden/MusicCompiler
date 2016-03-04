@@ -1,4 +1,3 @@
 PROGRAM Hello World
-  WHILE(;;i++)
-  END WHILE
+  i(3,2,1) = (a + c)*(d+h) / funcCall(2,2); 
 END PROGRAM Hello World

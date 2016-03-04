@@ -16,6 +16,7 @@ public static enum AST_Type{
     Collection,
     BooleanExpression,
     ArithmeticExpression,
+    EqualExpression, 
     Variable,
     FuncCall,
     Default,

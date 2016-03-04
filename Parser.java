@@ -198,8 +198,9 @@ public class Parser {
         } else if(token.get(0).type == Lexer.TokenType.EndCollectionTok){
           System.out.print("Collection ends line: ");
           System.out.println(i);
-        }else {
-          ParseExpression(token,i,filename); 
+        }else { 
+          AstNode scope = GetScope(file); 
+          ParseExpression(token,i,filename,scope); 
         }
       }//end token size check
       i++;
@@ -610,24 +611,25 @@ public class Parser {
     return;
   }//end Parse Collection
     
-  public void ParseExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename){
-    int i = 0; 
-    for(Lexer.Token tk : LexInput){
-      if(tk.type == Lexer.TokenType.EqualOpTok){
-        ParseEqualExpression(LexInput,lineNum,filename,i);
-        return; 
+  public void ParseExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstNode file){
+   
+    int i = 0;
+    for(Lexer.Token tk : LexInput){  
+      if(tk.type == Lexer.TokenType.EqualOpTok){ 
+        ParseEqualExpression(LexInput,lineNum,filename,i,file);
+        //return;
       }else if(tk.type == Lexer.TokenType.OpenParenTok){
         ParseOpenParenExpression(LexInput,lineNum,filename,i);
-        return; 
+        //return; 
       }else if(tk.type == Lexer.TokenType.BooleanOpTok){
         ParseBooleanExpression(LexInput,lineNum,filename,i);
-        return;
+        //return;
       } else if(tk.type == Lexer.TokenType.BinaryOpTok){
         ParseArithmeticExpression(LexInput,lineNum,filename,i);
-        return; 
+        //return; 
       } else if(tk.type == Lexer.TokenType.CommaTok){
         ParseCommaExpression(LexInput,lineNum,filename,i); 
-        return;
+        //return;
       } else if(tk.type == Lexer.TokenType.ScopeTok){
         ParseScopeExpression(LexInput,lineNum,filename,i);
       } else if(tk.type == Lexer.TokenType.ColonTok){
@@ -637,13 +639,20 @@ public class Parser {
       }
       i++;
     }
-
+    return; 
   }//end Parse Expression
   
-  public void ParseEqualExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+  public void ParseEqualExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i, AstNode file){
+     
     int equalIndex = i;
-    boolean equalOp = false;
+    //boolean equalOp = false;
     String err;
+  
+    //Parse Loop Conditions with the expression parser.
+    AstEqualExpressionNode equalNode = new AstEqualExpressionNode(file.getFileWriter()); 
+    AstVariableNode rightSideNode = new AstVariableNode(lineNum);
+    AstVariableNode leftSideNode = new AstVariableNode(lineNum);
+    equalNode.setBegin(lineNum); 
     
     for(int j = i+1; j < LexInput.size(); j++){
       if(LexInput.get(j).type == Lexer.TokenType.EqualOpTok){ 
@@ -654,18 +663,41 @@ public class Parser {
 
     ArrayList<Lexer.Token> leftEqualOpArray = new ArrayList<Lexer.Token>(equalIndex);
     ArrayList<Lexer.Token> rightEqualOpArray = new ArrayList<Lexer.Token>(LexInput.size() - equalIndex - 2);
-
-    for(int j = 0; i < equalIndex; j++){
-      leftEqualOpArray.add(LexInput.get(j));
+    
+    for(int j = 0; j < equalIndex; j++){
+      leftEqualOpArray.add(LexInput.get(j));  
     }
 
     for(int j = equalIndex+1; j < LexInput.size(); j++){ 
       rightEqualOpArray.add(LexInput.get(j));
     }
+    
+    rightSideNode.setType("RHS: ");
+    leftSideNode.setType("LHS: ");
+    
+    String rhsName = "";
+    String lhsName = "";
 
-    ParseExpression(rightEqualOpArray,lineNum,filename);
-    ParseExpression(leftEqualOpArray,lineNum,filename);
+    for(Lexer.Token c : leftEqualOpArray){
+      lhsName += c.data;
+    }
+    
+    for(Lexer.Token c : rightEqualOpArray){
+      rhsName += c.data;
+    }
+    
+    leftSideNode.setName(lhsName);
+    rightSideNode.setName(rhsName);
 
+    equalNode.addChild(leftSideNode); 
+    equalNode.addChild(rightSideNode);
+
+    ParseExpression(rightEqualOpArray,lineNum,filename,equalNode);
+    ParseExpression(leftEqualOpArray,lineNum,filename,equalNode);
+    
+    equalNode.setEnd(lineNum);
+    equalNode.haveAllInfo();
+    file.addChild(equalNode);
   }//end ParseEqualExpression
 
   public void ParseBooleanExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
@@ -684,8 +716,8 @@ public class Parser {
         rightBoolOpArray.add(LexInput.get(j));
       }
 
-      ParseExpression(rightBoolOpArray,lineNum,filename);
-      ParseExpression(leftBoolOpArray,lineNum,filename);
+      //ParseExpression(rightBoolOpArray,lineNum,filename);
+      //ParseExpression(leftBoolOpArray,lineNum,filename);
     } else{
       err = "Invalid boolean expression";
       ParseErrorReport(lineNum,filename,err);
@@ -708,8 +740,8 @@ public class Parser {
         rightArithOpArray.add(LexInput.get(j));
       }
 
-      ParseExpression(rightArithOpArray,lineNum,filename);
-      ParseExpression(leftArithOpArray,lineNum,filename);
+      //ParseExpression(rightArithOpArray,lineNum,filename);
+      //ParseExpression(leftArithOpArray,lineNum,filename);
     } else {
       err = "Invalid arithmetic expression";
       ParseErrorReport(lineNum,filename,err);
@@ -735,13 +767,13 @@ public class Parser {
       } else {
         //nested in the expression is a ( , that isn't a function call 
         ArrayList<Lexer.Token> expression = new ArrayList<Lexer.Token>(LexInput.subList(i+1,LexInput.size()));
-        ParseExpression(expression,lineNum,filename);  
+        //ParseExpression(expression,lineNum,filename);  
         return; 
       }
     } else {
       //Expression starts with a (
       ArrayList<Lexer.Token> expression = new ArrayList<Lexer.Token>(LexInput.subList(i+1,LexInput.size()));
-      ParseExpression(expression,lineNum,filename); 
+      //ParseExpression(expression,lineNum,filename); 
       return; 
     }
   }//end Parse OpenParen Expression
@@ -752,7 +784,7 @@ public class Parser {
       if(LexInput.size() >= 2){ 
         String functionName = LexInput.get(0).data;
         ArrayList<Lexer.Token> functionExpression = new ArrayList<Lexer.Token>(LexInput.subList(2,LexInput.size())); 
-        ParseExpression(functionExpression,lineNum,filename); 
+        //ParseExpression(functionExpression,lineNum,filename); 
       } else{
         err = "Invalid function call expression";
         ParseErrorReport(lineNum,filename,err);
@@ -787,7 +819,7 @@ public class Parser {
     if(i > 0 && LexInput.size() > i+1){
       scope = LexInput.get(i-1).data;  
       ArrayList<Lexer.Token> scopedExpression = new ArrayList<Lexer.Token>(LexInput.subList(2,LexInput.size()));
-      ParseExpression(scopedExpression,lineNum,filename);
+      //ParseExpression(scopedExpression,lineNum,filename);
     }else { 
       err = "Invalid Scope operator";
       ParseErrorReport(lineNum,filename,err);
