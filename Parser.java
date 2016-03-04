@@ -614,18 +614,23 @@ public class Parser {
   public void ParseExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, AstNode file){
    
     int i = 0;
-    for(Lexer.Token tk : LexInput){  
+    for(Lexer.Token tk : LexInput){   
       if(tk.type == Lexer.TokenType.EqualOpTok){ 
         ParseEqualExpression(LexInput,lineNum,filename,i,file);
-        //return;
-      }else if(tk.type == Lexer.TokenType.OpenParenTok){
+      }
+      i++; 
+    }
+
+    i = 0;
+    for(Lexer.Token tk : LexInput){
+      if(tk.type == Lexer.TokenType.OpenParenTok){
         ParseOpenParenExpression(LexInput,lineNum,filename,i);
         //return; 
       }else if(tk.type == Lexer.TokenType.BooleanOpTok){
         ParseBooleanExpression(LexInput,lineNum,filename,i);
         //return;
       } else if(tk.type == Lexer.TokenType.BinaryOpTok){
-        ParseArithmeticExpression(LexInput,lineNum,filename,i);
+        ParseArithmeticExpression(LexInput,lineNum,filename,i,file);
         //return; 
       } else if(tk.type == Lexer.TokenType.CommaTok){
         ParseCommaExpression(LexInput,lineNum,filename,i); 
@@ -645,10 +650,8 @@ public class Parser {
   public void ParseEqualExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i, AstNode file){
      
     int equalIndex = i;
-    //boolean equalOp = false;
     String err;
   
-    //Parse Loop Conditions with the expression parser.
     AstEqualExpressionNode equalNode = new AstEqualExpressionNode(file.getFileWriter()); 
     AstVariableNode rightSideNode = new AstVariableNode(lineNum);
     AstVariableNode leftSideNode = new AstVariableNode(lineNum);
@@ -724,14 +727,21 @@ public class Parser {
     }
   }//end Parse Boolean Expression
 
-  public void ParseArithmeticExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){
+  public void ParseArithmeticExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i, AstNode file){  
     int arithIndex = i;
     String err;
+   
+    AstArithmeticExpressionNode arithNode = new AstArithmeticExpressionNode(file.getFileWriter()); 
+    AstVariableNode rightSideNode = new AstVariableNode(lineNum);
+    AstVariableNode leftSideNode = new AstVariableNode(lineNum);
+    arithNode.setBegin(lineNum); 
     
-    if((LexInput.size() - arithIndex - 2) >= 0){
-      ArrayList<Lexer.Token> leftArithOpArray = new ArrayList<Lexer.Token>(arithIndex);
-      ArrayList<Lexer.Token> rightArithOpArray = new ArrayList<Lexer.Token>(LexInput.size() - arithIndex - 2);
+    arithNode.setName(LexInput.get(i).data);
+    
+    ArrayList<Lexer.Token> leftArithOpArray = new ArrayList<Lexer.Token>(arithIndex);
+    ArrayList<Lexer.Token> rightArithOpArray = new ArrayList<Lexer.Token>(LexInput.size() - arithIndex - 2);
 
+    if((LexInput.size() - arithIndex - 2) >= 0){
       for(int j = 0; j < arithIndex; j++){
         leftArithOpArray.add(LexInput.get(j));
       }
@@ -740,12 +750,38 @@ public class Parser {
         rightArithOpArray.add(LexInput.get(j));
       }
 
-      //ParseExpression(rightArithOpArray,lineNum,filename);
-      //ParseExpression(leftArithOpArray,lineNum,filename);
     } else {
       err = "Invalid arithmetic expression";
       ParseErrorReport(lineNum,filename,err);
     }
+
+    rightSideNode.setType("RHS: ");
+    leftSideNode.setType("LHS: ");
+    
+    String rhsName = "";
+    String lhsName = "";
+
+    for(Lexer.Token c : leftArithOpArray){
+      lhsName += c.data;
+    }
+    
+    for(Lexer.Token c : rightArithOpArray){
+      rhsName += c.data;
+    }
+    
+    leftSideNode.setName(lhsName);
+    rightSideNode.setName(rhsName);
+
+    arithNode.addChild(leftSideNode); 
+    arithNode.addChild(rightSideNode);
+
+    //ParseExpression(rightEqualOpArray,lineNum,filename,equalNode);
+    //ParseExpression(leftEqualOpArray,lineNum,filename,equalNode);
+    
+    arithNode.setEnd(lineNum);
+    arithNode.haveAllInfo();
+    file.addChild(arithNode);
+
   }//end Parse Arithmetic Expression
   
   public void ParseOpenParenExpression(ArrayList<Lexer.Token> LexInput, int lineNum, String filename, int i){ 

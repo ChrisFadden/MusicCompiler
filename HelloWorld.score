@@ -1,3 +1,6 @@
 PROGRAM Hello World
-  i(3,2,1) = (a + c)*(d+h) / funcCall(2,2); 
+  a + 4
+  b - c
+  d * 2
+  e / Fa
 END PROGRAM Hello World

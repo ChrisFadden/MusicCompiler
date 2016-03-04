@@ -47,7 +47,7 @@ public class Lexer {
     //Number/Operation Tokens
     NumberTok("-?[0-9]+"),
     CommentTok("(//)"),
-    BinaryOpTok("[*|/|+|-|!]"),
+    BinaryOpTok("[-|/|+|*|!]"),
     BooleanOpTok("(<=|>=|<|>|==|!=)"),
     EqualOpTok("(=)"),
     WhitespaceTok("[ \t\r\n\f]+ "), 
